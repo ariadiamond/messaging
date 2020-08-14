@@ -1,9 +1,9 @@
-CC     = g++
+CC     = gcc
 FLAGS  = -Wall -Wextra -Wpedantic -Wshadow -pthread
 SHARED = ../shared/Parse.c
 SOURCE = Main.c Ports.c Threads.c
 OBJECT = $(patsubst %.c,%.o, $(SOURCE)) Parse.o
-EXE    = Server
+EXE    = CryptMessageServer
 
 all: $(EXE)
 

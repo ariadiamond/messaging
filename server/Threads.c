@@ -5,7 +5,6 @@
 //file output
 #include<fcntl.h>
 #include<unistd.h>
-//stdio //dprintf
 
 #include<sys/socket.h> //recv
 
@@ -24,15 +23,18 @@ void recvMessage(int clientSock);
 void* threadRunner(void* parg) {
 	int cdesc = ((int*) parg)[0];
 	recvMessage(cdesc);
-	//Do you want to ack?
 	close(cdesc);
 	return NULL;
 }
 
 void recvMessage(int clientSock) {
 	char buffer[BUFFER_SIZE];
-	size_t bytesRead = recv(clientSock, buffer, BUFFER_SIZE, 0);
-	parse_t deconstruct = demarshall(buffer);
+	ssize_t bytesRead = recv(clientSock, buffer, BUFFER_SIZE, 0);
+	if (bytesRead < 0)
+		return;
+	parse_t deconstruct;
+	if (!demarshall(buffer, &deconstruct))
+		return;
 	writeMessage(deconstruct, clientSock, buffer);
 }
 
@@ -50,12 +52,16 @@ void writeMessage(parse_t info, int clientDesc, char* buffer) {
 				exit(1);
 		}
 	}
-	dprintf(fdesc, "From: %s\nLength: %du", info.from, info.length);
+	dprintf(clientDesc, "Recieved"); //ack
 	ssize_t bytesRead = recv(clientDesc, buffer, BUFFER_SIZE, 0);
 	if (bytesRead < 0) {
-
+		return;
 	}
+
+	dprintf(fdesc, "From: %s Length: %04X\n", info.from, info.length);
 	write(fdesc, buffer, bytesRead);
+	printf("\x1b[94m[+] To: %s From: %s Length: %04X\x1b[0m\n",
+		info.to, info.from, info.length);
 
 	close(fdesc);
 }

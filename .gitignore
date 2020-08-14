@@ -2,6 +2,10 @@
 *.o
 a.out
 
-
 #Executables
-Server
+client/Client
+server/CryptMessageServer
+
+#Queue - why did I make it?
+shared/Queue.?
+tests/QueueTest.c
