@@ -2,6 +2,7 @@
 #define _UTIL_H_
 
 #define BUFFER_SIZE 4096
+#define VERSION 0x0001
 
 /*
  * Includes

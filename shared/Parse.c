@@ -36,11 +36,21 @@ bool demarshall(char* header, parse_t* parsed) {
 	strncpy(parsed->from, val, ID_SIZE);
 	parsed->from[ID_SIZE] = 0;
 
-	//parsing Length
-	uint16_t messageSize[1];
+	//parsing version
 	line = strtok_r(NULL, "\n", &savePtr);
 	if (line == NULL)
 		return false;
+	uint16_t version[1];
+	ret = sscanf(line, "Version: %hX", version);
+	if (ret != 1)
+		return false;
+	parsed->version = version[0];
+
+	//parsing Length
+	line = strtok_r(NULL, "\n", &savePtr);
+	if (line == NULL)
+		return false;
+	uint16_t messageSize[1];
 	ret = sscanf(line, "Length: %hX", messageSize);
 	if (ret != 1)
 		return false;
@@ -50,9 +60,8 @@ bool demarshall(char* header, parse_t* parsed) {
 }
 
 bool marshall(parse_t items, char* header) {
-	if (strlen(items.to) != 4 || strlen(items.from) != 4)
-		return false;
-	snprintf(header, HEADER_SIZE + 1, "To: %s\nFrom: %s\nLength: %04X\n",
-		items.to, items.from, items.length);
+	snprintf(header, HEADER_SIZE + 1, "To: %s\nFrom: %s\nVersion: %04X\nLength: %04X\n",
+		items.to, items.from, items.version, items.length);
+	header[HEADER_SIZE] = 0;
 	return true;
 }

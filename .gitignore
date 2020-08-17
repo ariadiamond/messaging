@@ -1,11 +1,19 @@
-#C object Files
+# C object Files
 *.o
 a.out
 
-#Executables
+# Executables
 client/Client
-server/CryptMessageServer
+server/CryptMsgServer
+tests/PseudoClient
 
-#Queue - why did I make it?
+# Queue - why did I make it?
 shared/Queue.?
 tests/QueueTest.c
+
+
+# Names I use for testing
+aria
+axoo
+rmnd
+soft

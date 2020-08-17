@@ -13,7 +13,7 @@
  */
 
 #define ID_SIZE 4
-#define HEADER_SIZE 34
+#define HEADER_SIZE 48
 
 /*
  * parse_t struct
@@ -22,6 +22,7 @@
 typedef struct parse_t {
 	char to[ID_SIZE + 1];
 	char from[ID_SIZE + 1];
+	uint16_t version; //this might be useful, especially with encryption method
 	uint16_t length; //I'm only doing max 4096 byte messages
 } parse_t;
 

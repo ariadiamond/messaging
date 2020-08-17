@@ -1,6 +1,9 @@
 //#include<unistd.h> //getopt
 #include<stdlib.h> //atoi
 
+#include<unistd.h>
+#include<fcntl.h> //open
+
 #include"Util.h"
 
 /*
@@ -24,11 +27,10 @@ cliArgs parseArgs(int argc, char** argv) {
 }
 
 
-
-
 int main(int argc, char** argv) {
 	cliArgs args = parseArgs(argc, argv);
-	printf("\x1b[1;34mStarting server on port: %hu\x1b[0m\n", args.port);
+
+	printf("\x1b[1;36mStarting server on port: %hu\x1b[0m\n", args.port);
 	int sockDesc = createServerSock(args.port);
 	runner(sockDesc);
 

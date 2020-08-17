@@ -1,5 +1,5 @@
 CC     = gcc
-FLAGS  = -Wall -Wextra -Wpedantic -Wshadow -O0
+FLAGS  = -Wall -Wextra -Wpedantic -Wshadow
 SHARED = ../shared/Parse.c
 SOURCE = Main.c Connect.c Message.c
 OBJECT = $(patsubst %.c,%.o, $(SOURCE)) Parse.o

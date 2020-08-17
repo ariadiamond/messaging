@@ -1,14 +1,11 @@
 #!/bin/bash
 
-CLIENTDIR=../client/
-CLIENT=Client
+CLIENT=PseudoClient
 SERVERDIR=../server/
-SERVER=CryptMessageServer
+SERVER=CryptMsgServer
 
 
-# Build client and server
-cd ${CLIENTDIR}
-make
+# Build server
 cd ${SERVERDIR}
 make
 
@@ -17,10 +14,26 @@ cd ../tests/
 ${SERVERDIR}${SERVER} 8080&
 sleep 1
 
-# Run clients
-${CLIENTDIR}${CLIENT} aria
-${CLIENTDIR}${CLIENT} aria
+# Build Client
+make pseudo
+
+# Send messages
+echo "Make sure you are hydrated" > msgFile
+./${CLIENT} aria rmnd msgFile
+echo "Blankets are super good!" > msgFile
+./${CLIENT} hmmm soft msgFile
+echo "It's okay to be emotionally vulnerable" > msgFile
+./${CLIENT} hmmm rmnd msgFile
+echo "You can be hydrated and happy with Hot Chocolate :)" > msgFile
+./${CLIENT} rmnd soft msgFile
+echo "Stuffed animals as cuddle buddies >>>>\nhehe" > msgFile
+./${CLIENT} soft soft msgFile
+
+# Get Messages
+./${CLIENT} rmnd
+./${CLIENT} soft
 
 
 # Cleanup
 pkill ${SERVER}
+rm msgFile soft rmnd
