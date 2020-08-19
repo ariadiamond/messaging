@@ -71,8 +71,12 @@ void writeMessage(parse_t info, int clientDesc, char* buffer) {
 		exit(1);
 	}
 
+    //putting the marshalled header because it is easier after requests
+    write(fdesc, buffer, HEADER_SIZE);
+
+
     //This ack is because it expects the header, then the message body in 2
-    //separate things (also such that the buffer can be reused)
+    //separate messages (also such that the buffer can be reused)
 	dprintf(clientDesc, "Recieved");
 
     //get full message
@@ -82,7 +86,6 @@ void writeMessage(parse_t info, int clientDesc, char* buffer) {
 	}
 
     //write response
-	dprintf(fdesc, "From: %s Length: %04X\n", info.from, info.length);
 	write(fdesc, buffer, bytesRead);
 	printf("\x1b[94m[+] To: %s From: %s Length: %04X\x1b[0m\n",
 		info.to, info.from, info.length);

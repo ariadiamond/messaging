@@ -29,8 +29,7 @@ echo "It's okay to be emotionally vulnerable" > msgFile
 ./${CLIENT} hmmm rmnd msgFile
 echo "You can be hydrated and happy with Hot Chocolate :)" > msgFile
 ./${CLIENT} rmnd soft msgFile
-echo "Stuffed animals as cuddle buddies >>>>
-hehe" > msgFile
+echo -e "Stuffed animals as cuddle buddies >>>>\n(hehe)" > msgFile
 ./${CLIENT} soft soft msgFile
 
 # Get Messages
@@ -38,7 +37,9 @@ hehe" > msgFile
 ./${CLIENT} soft
 
 echo "It's okay not to be perfect, although if you don't try, you will never find out how you do." > msgFile
-./${CLIENT} aria rmnd msgFile #It doesn't always work FIXME: Client error
+./${CLIENT} aria rmnd msgFile
+echo "You.\nAre.\nImportant.\n" > msgFile # checking if escape sequences work
+./${CLIENT} axoo rmnd msgFile
 ./${CLIENT} rmnd
 
 echo "" #newline

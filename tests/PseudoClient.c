@@ -23,6 +23,8 @@ void sendMsg(int cdesc, char** argv) {
 					};
 	strncpy(items.from, argv[1], ID_SIZE);
 	strncpy(items.to, argv[2], ID_SIZE);
+    items.from[ID_SIZE] = 0;
+    items.to[ID_SIZE] = 0;
 	marshall(items, header);
 	send(cdesc, header, HEADER_SIZE, 0);
 	recv(cdesc, header, HEADER_SIZE, 0);

@@ -3,6 +3,8 @@
 #include<stdio.h>
 #include<string.h> //strncpy strncmp
 
+#include<sys/socket.h>
+
 #include"Util.h"
 
 bool validName(char* name) {
@@ -39,4 +41,31 @@ parse_t createMessage(char* buffer, char* from) {
 	ssize_t bytesRead = read(STDIN_FILENO, buffer, BUFFER_SIZE);
 	info.length = bytesRead;
 	return info;
+}
+
+size_t prettyPrint(int clientDesc, char* buffer) {
+    //getting header
+    //this will be helpful when versions are relevant for decryption
+    if (recv(clientDesc, buffer, HEADER_SIZE, 0) != HEADER_SIZE) {
+        perror("MessageHelper::prettyPrint::recv1");
+        return 0;
+    }
+    parse_t info;
+    if (!demarshall(buffer, &info)) {
+        printf("Someone doesn't know how to format :O\n");
+        return 0;
+    }
+
+    //get the body
+    if (recv(clientDesc, buffer, info.length, 0) != (ssize_t) info.length) {
+        perror("MessageHelper::prettyPrint::recv2");
+        return 0;
+    }
+
+    //print the messages
+    printf("From: \x1b[35m%s\x1b[0m\n", info.from);
+    write(STDOUT_FILENO, buffer, info.length);
+
+    //return bytes received so we don't wait for something that will never come
+    return HEADER_SIZE + info.length;
 }

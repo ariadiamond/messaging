@@ -44,15 +44,6 @@ where name is you
 --------------------------------------------------------------------------------
 ## TODO
 
-#### Before v1.0.0
-
-1. ~~error log~~
-2. ~~cleanup code~~
-3. ~~comments~~
-4. pretty print messages received
-
-#### Later
-
 1. Client config file
 2. encryption (lol)
 3. Registering names so some message integrity

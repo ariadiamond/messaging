@@ -32,10 +32,11 @@ void getMessages(int clientDesc, char* from) {
 	dprintf(clientDesc, "To: NULL\nFrom: %s\nVersion: %04X\nLength: 0000\n",
         from, VERSION);
 
-    //FIXME: this could also receive messages because messages are just sent
-    //over the buffer without an ack (and this could get descheduled) so it
-    //doesn't call recv quickly enough
-	ssize_t bytesRead = recv(clientDesc, buffer, BUFFER_SIZE, 0);
+
+	if (recv(clientDesc, buffer, BUFFER_SIZE, 0) < 1) {
+        perror("Message::getMessages::recv");
+        return;
+    }
     dprintf(clientDesc, "Recieved");
 
     //parse response
@@ -43,20 +44,17 @@ void getMessages(int clientDesc, char* from) {
 	sscanf(buffer, "%lu", lengths);
 	if (*lengths == 0) {
 		printf("You don't have any new messages\n");
+        close(clientDesc);
 		return;
 	}
 
-    //this is if there are new messages
-	size_t received = 0;
-	while (received < *lengths) {
-		bytesRead = recv(clientDesc, buffer, BUFFER_SIZE, 0);
-		if (bytesRead < 1) { //FIXME: why does it do this? - SEE FIXME above!!
-			perror("Message::getMessages::recv");
-			exit(1);
-		}
-		write(STDIN_FILENO, buffer, bytesRead);
-		received += bytesRead;
-	}
+    size_t bytesRecv = 0;
+    while(bytesRecv < *lengths) {
+        size_t bytesRead = prettyPrint(clientDesc, buffer);
+        if (bytesRead == 0) //error message printed by prettyPrint()
+            break;
+        bytesRecv += bytesRead;
+    }
 
 	close(clientDesc);
 }
