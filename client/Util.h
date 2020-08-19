@@ -10,11 +10,13 @@
 #define VERSION 0x0001
 
 
-//Message.c
+//MessageHelper.c
 parse_t createMessage(char* buffer, char* from);
 
-//Connect.c
+//Ports.c
 int createClientSock(uint16_t port);
+
+//Message.c
 void sendMessage(int clientDesc, char* from);
 void getMessages(int clientDesc, char* from);
 

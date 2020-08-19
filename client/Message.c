@@ -1,46 +1,62 @@
-#include<unistd.h> //read
-
 #include<stdio.h>
-#include<string.h> //strncpy
+#include<stdlib.h>
+#include<unistd.h> //write
+
+#include<sys/socket.h>
 
 #include"Util.h"
 
-bool validName(char* name) {
-	if (strncmp(name, "NULL", ID_SIZE) == 0) //Protects getting messages
-		return false;
-	for (uint8_t i = 0; i < ID_SIZE; i++) {
-		if (name[i] < 32 || name[i] > 126)
-			return false;
-	}
-	return true;
+
+void sendMessage(int clientDesc, char* from) {
+    //get message info
+	char buffer[BUFFER_SIZE];
+	parse_t headerInfo = createMessage(buffer, from);
+
+    //marshall message
+	char header[HEADER_SIZE + 1];
+	if (!marshall(headerInfo, header))
+		return;
+
+    //send message
+	send(clientDesc, header, HEADER_SIZE, 0);
+	recv(clientDesc, header, HEADER_SIZE, 0); //ack, however this gets stuck
+		//if it never gets a response TODO
+	send(clientDesc, buffer, headerInfo.length, 0);
+	close(clientDesc);
 }
 
 
-parse_t createMessage(char* buffer, char* from) {
-	//
-	parse_t info;
-	info.version = VERSION;
+void getMessages(int clientDesc, char* from) {
+    //send request
+	char buffer[BUFFER_SIZE];
+	dprintf(clientDesc, "To: NULL\nFrom: %s\nVersion: %04X\nLength: 0000\n",
+        from, VERSION);
 
-	//Who to message
-	strncpy(info.from, from, ID_SIZE);
-	info.from[ID_SIZE] = 0;
-	printf("Hi \x1b[34m%s\x1b[0m, who would you like to send a message to?\n",
-		from);
+    //FIXME: this could also receive messages because messages are just sent
+    //over the buffer without an ack (and this could get descheduled) so it
+    //doesn't call recv quickly enough
+	ssize_t bytesRead = recv(clientDesc, buffer, BUFFER_SIZE, 0);
+    dprintf(clientDesc, "Recieved");
 
-	//get input
-	read(STDIN_FILENO, buffer, BUFFER_SIZE);
-	strncpy(info.to, buffer, ID_SIZE);
-	info.to[ID_SIZE] = 0;
-
-	//I'm lazy, so recursion is how I'm handling invalid input
-	if (!validName(info.to)) {
-		printf("That's not a valid name\n");
-		return createMessage(buffer, from);
+    //parse response
+	size_t lengths[1];
+	sscanf(buffer, "%lu", lengths);
+	if (*lengths == 0) {
+		printf("You don't have any new messages\n");
+		return;
 	}
 
-	//actual message input
-	printf("What would you like to send to \x1b[35m%s\x1b[0m?\n", info.to);
-	ssize_t bytesRead = read(STDIN_FILENO, buffer, BUFFER_SIZE);
-	info.length = bytesRead;
-	return info;
+    //this is if there are new messages
+	size_t received = 0;
+	while (received < *lengths) {
+		bytesRead = recv(clientDesc, buffer, BUFFER_SIZE, 0);
+		if (bytesRead < 1) { //FIXME: why does it do this? - SEE FIXME above!!
+			perror("Message::getMessages::recv");
+			exit(1);
+		}
+		write(STDIN_FILENO, buffer, bytesRead);
+		received += bytesRead;
+	}
+
+	close(clientDesc);
 }

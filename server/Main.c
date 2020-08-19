@@ -1,37 +1,67 @@
-//#include<unistd.h> //getopt
-#include<stdlib.h> //atoi
-
-#include<unistd.h>
+#include<unistd.h> //getopt
 #include<fcntl.h> //open
+#include<stdlib.h> //atoi exit
 
 #include"Util.h"
 
 /*
- * CLI parsing
+ * Command line arguments parsing
  */
 
-typedef struct cliArgs_t {
-	uint16_t port;
-} cliArgs;
+CLArgs args = {
+              .logging = false,
+              .remove  = true };
 
-cliArgs parseArgs(int argc, char** argv) {
-	cliArgs args = {
-						.port = 8080
-						};
-	if (argc == 2) {
-		int ret = atoi(argv[1]);
-		if (ret > 0 || ret < UINT16_MAX)
-			args.port = ret;
+
+void usage(char* argv) {
+	dprintf(STDERR_FILENO, "Usage: %s [-p port] [-l] [-r]\n", argv);
+	dprintf(STDERR_FILENO, "\t-p port \x1b[3mwhere port is the port number\
+ (default is 8080)\x1b[0m\n");
+	dprintf(STDERR_FILENO, "\t-l \x1b[3mto enable logging\x1b[0m\n");
+	dprintf(STDERR_FILENO, "\t-r \x1b[3mto disable removing files after\
+ requests (helpful for debugging)\x1b[0m\n");
+	exit(1);
+}
+
+uint16_t parseArgs(int argc, char** argv) {
+	uint16_t port = 8080; //default port - this is not needed in CLArgs
+
+	//parsing args using getopt
+	for (uint8_t i = 0; i < 3; i++) {
+		int optChar = getopt(argc, argv, "p:lr");
+		if (optChar < 0)
+			return port;
+
+		switch (optChar) {
+			case 'l':
+				args.logging = true;
+				break;
+			case 'p':
+				port = atoi(optarg);
+				if (port == 0)
+					usage(argv[0]);
+				break;
+			case 'r':
+				args.remove = false;
+				break;
+			default:
+				usage(argv[0]);
+		}
 	}
-	return args;
+	return port;
 }
 
 
 int main(int argc, char** argv) {
-	cliArgs args = parseArgs(argc, argv);
+	uint16_t port = parseArgs(argc, argv);
+    if (args.logging) {
+        int fdesc = open(ERR_FILE, O_WRONLY | O_CREAT | O_APPEND, 0644);
+        close(fdesc);
+    }
 
-	printf("\x1b[1;36mStarting server on port: %hu\x1b[0m\n", args.port);
-	int sockDesc = createServerSock(args.port);
+	int sockDesc = createServerSock(port);
+	printf("\x1b[1;36mStarted server on port: %hu\x1b[0m\n", port);
+
 	runner(sockDesc);
 
 	return 0;

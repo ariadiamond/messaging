@@ -11,6 +11,8 @@ tests/PseudoClient
 shared/Queue.?
 tests/QueueTest.c
 
+# logs
+error.log
 
 # Names I use for testing
 aria

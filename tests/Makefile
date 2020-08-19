@@ -12,8 +12,8 @@ QOBJ  = QueueTest.o Queue.o Test.o
 QEXE  = QueueTest
 
 # Pseudo Client - designed for automation
-SUDO  = PseudoClient.c ../client/Connect.c ../client/Message.c ../shared/Parse.c
-SOBJ  = PseudoClient.o Connect.o Parse.o Message.o
+SUDO  = PseudoClient.c ../client/Ports.c ../client/Message*.c ../shared/Parse.c
+SOBJ  = PseudoClient.o Ports.o Parse.o Message*.o
 SEXE  = PseudoClient
 
 parse: $(PARSE)

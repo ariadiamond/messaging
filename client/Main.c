@@ -10,7 +10,7 @@
  * Function Definitions
  */
 
- void menu(char* from) {
+void menu(char* from) {
     while(true) {
         //Print menu
      	printf("What would you like to do?\n");
@@ -23,7 +23,7 @@
         uint8_t option;
      	read(STDIN_FILENO, buffer, 2);
      	if (buffer[0] == 81 || buffer[0] == 113) //Q or q
-     		option = 0;
+     		exit(0);
      	else if (buffer[0] > 48 && buffer[0] < 58) //1-10
      		option = (buffer[0] - 48);
      	else {
@@ -32,9 +32,7 @@
 
         //act on the input
     	int cdesc = createClientSock(8080); //it disconnects each time TODO?
-    	switch(menu()) {
-    		case 0:
-    			exit(0); //we can do this because there isn't really cleanup
+    	switch(option) {
     		case 1:
     			sendMessage(cdesc, from);
     			break;
@@ -65,6 +63,6 @@ int main(int argc, char** argv) {
 
     //menu
     menu(from);
-    
+
 	return 0;
 }

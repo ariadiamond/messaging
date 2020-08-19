@@ -1,9 +1,6 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
-#define BUFFER_SIZE 4096
-#define VERSION 0x0001
-
 /*
  * Includes
  */
@@ -12,21 +9,37 @@
 #include<errno.h>
 #include<stdio.h>
 
+// Standard types
 #include<stdint.h>
+#include<stdbool.h>
 
 #include"../shared/Parse.h"
 
 /*
- * Threads Functions
+ * Defines
  */
 
-void* threadRunner(void* parg);
+ #define BUFFER_SIZE 4096
+ #define VERSION 0x0001
+ #define ERR_FILE "error.log"
 
 /*
- * Ports Functions
+ * Options struct
  */
 
- int createServerSock(size_t port);
- void runner(int sockDesc);
+typedef struct CLArgs_t {
+	bool logging;
+	bool remove;
+} CLArgs;
+
+// Runners Functions
+void runner(int sockDesc);
+void* threadRunner(void* parg);
+
+// Ports Functions
+int createServerSock(size_t port);
+
+// Messages Functions
+void recvMessage(int clientSock);
 
 #endif

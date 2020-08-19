@@ -1,7 +1,7 @@
 CC     = gcc
 FLAGS  = -Wall -Wextra -Wpedantic -Wshadow
 SHARED = ../shared/Parse.c
-SOURCE = Main.c Ports.c Threads.c
+SOURCE = Main.c Ports.c Message.c Runners.c
 OBJECT = $(patsubst %.c,%.o, $(SOURCE)) Parse.o
 EXE    = CryptMsgServer
 
@@ -14,8 +14,8 @@ $(OBJECT): $(SOURCE) $(SHARED)
 	$(CC) $(FLAGS) -c $^
 
 gdb: $(SOURCE) $(SHARED)
-	$(CC) $(FLAGS) -g $^
-	$@ -args a.out 8080
+	$(CC) $(FLAGS) -pthread -g $^
+	$@ -args a.out -l -r
 	rm a.out
 
 clean:
