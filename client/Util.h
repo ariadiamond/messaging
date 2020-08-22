@@ -15,7 +15,7 @@ parse_t createMessage(char* buffer, char* from);
 size_t prettyPrint(int clientDesc, char* buffer);
 
 //Ports.c
-int createClientSock(uint16_t port);
+int createClientSock(char* address, uint16_t port);
 
 //Message.c
 void sendMessage(int clientDesc, char* from);

@@ -15,3 +15,8 @@ $(OBJECT): $(SOURCE) $(SHARED)
 
 clean:
 	rm $(OBJECT) $(EXE)
+
+config: Config.c
+	$(CC) $(FLAGS) $^
+	./a.out
+	rm a.out

@@ -9,7 +9,7 @@
 
 #include"Util.h"
 
-int createClientSock(uint16_t port) {
+int createClientSock(char* address, uint16_t port) {
     //TCP IPv4
 	int clientDesc = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -20,7 +20,7 @@ int createClientSock(uint16_t port) {
 	serverAddr.sin_port = htons(port);
 
     //converts human readable addresses to machine readable addresses
-	if (inet_pton(AF_INET, "127.0.0.1", &(serverAddr.sin_addr)) != 1) {
+	if (inet_pton(AF_INET, address, &(serverAddr.sin_addr)) != 1) {
         perror("Ports::createClientSock::inet_pton");
         exit(1);
     }

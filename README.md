@@ -2,7 +2,7 @@
 
 *This project is partially a result of worrying about not being good enough for grad school applications.*
 
-This is a messaging client and server pair and (will) pass encrypted messages.
+This is a messaging client and server pair and (will) pass encrypted messages. Please don't actually use this for sensitive things (use something like Signal).
 
 --------------------------------------------------------------------------------
 ## Building
@@ -18,6 +18,7 @@ The client can be done the same way (but into the client directory)
 
 ```bash
 cd client/
+make config
 make
 ```
 
@@ -37,13 +38,11 @@ To start the server:
 
 To run the client:
 ```bash
-./client/Client name
+./client/Client
 ```
-where name is you
 
 --------------------------------------------------------------------------------
 ## TODO
 
-1. Client config file
-2. encryption (lol)
-3. Registering names so some message integrity
+1. encryption (lol)
+2. Registering names so some message integrity
