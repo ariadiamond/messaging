@@ -6,11 +6,6 @@ PARSE = ParseTest.c ../shared/Parse.c Test.c
 POBJ  = ParseTest.o Parse.o Test.o
 PEXE  = ParseTest
 
-# Queue
-QUEUE = QueueTest.c ../shared/Queue.c Test.c
-QOBJ  = QueueTest.o Queue.o Test.o
-QEXE  = QueueTest
-
 # Pseudo Client - designed for automation
 SUDO  = PseudoClient.c ../client/Ports.c ../client/Message*.c ../shared/Parse.c
 SOBJ  = PseudoClient.o Ports.o Parse.o Message*.o
@@ -22,15 +17,7 @@ parse: $(PARSE)
 	./$(PEXE)
 	rm $(PEXE) $(POBJ)
 
-queue: $(QUEUE)
-	$(CC) $(FLAGS) -c $^
-	$(CC) -pthread -o $(QEXE) $(QOBJ)
-	./$(QEXE)
-	rm $(QEXE) $(QOBJ)
-
 pseudo: $(SUDO)
 	$(CC) $(FLAGS) -c $^
 	$(CC) -o $(SEXE) $(SOBJ)
-
-clean:
-	rm $(SOBJ) $(SEXE)
+	rm $(SOBJ)
