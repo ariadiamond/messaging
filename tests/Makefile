@@ -7,9 +7,12 @@ POBJ  = ParseTest.o Parse.o Test.o
 PEXE  = ParseTest
 
 # Pseudo Client - designed for automation
-SUDO  = PseudoClient.c ../client/Ports.c ../client/Message*.c ../shared/Parse.c
-SOBJ  = PseudoClient.o Ports.o Parse.o Message*.o
-SEXE  = PseudoClient
+LOCAL  = PseudoClient.c
+CLIENT = ../client/Ports.c ../client/Message*.c
+SHARED = ../shared/Parse.c ../shared/Crypt.c ../shared/Convert.c
+SOURCE = $(LOCAL) $(CLIENT) $(SHARED)
+SOBJ   = $(patsubst %.c, %.o, $(LOCAL)) $(patsubst ../client/%.c, %.o, $(CLIENT)) $(patsubst ../shared/%.c, %.o,  $(SHARED))
+SEXE   = PseudoClient
 
 parse: $(PARSE)
 	$(CC) $(FLAGS) -c $^
@@ -17,7 +20,7 @@ parse: $(PARSE)
 	./$(PEXE)
 	rm $(PEXE) $(POBJ)
 
-pseudo: $(SUDO)
+pseudo: $(SOURCE)
 	$(CC) $(FLAGS) -c $^
 	$(CC) -o $(SEXE) $(SOBJ)
 	rm $(SOBJ)

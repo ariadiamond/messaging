@@ -6,12 +6,14 @@
 
 #include"Util.h"
 
-
-void sendMessage(int clientDesc, char* from) {
-    //get message info
-	char buffer[BUFFER_SIZE];
+//this is solely to make Pseudoclient easier
+void sendMessages(int clientDesc, char* from) {
+    char buffer[BUFFER_SIZE];
 	parse_t headerInfo = createMessage(buffer, from);
+    passMessage(clientDesc, headerInfo, buffer);
+}
 
+void passMessage(int clientDesc, parse_t headerInfo, char* buffer) {
     //marshall message
 	char header[HEADER_SIZE + 1];
 	if (!marshall(headerInfo, header))

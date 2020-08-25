@@ -34,7 +34,7 @@ void menu(char* from) {
     	int cdesc = createClientSock(8080); //it disconnects each time TODO?
     	switch(option) {
     		case 1:
-    			sendMessage(cdesc, from);
+    			sendMessages(cdesc, from);
     			break;
     		case 2:
     			getMessages(cdesc, from);

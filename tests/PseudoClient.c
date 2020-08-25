@@ -16,7 +16,6 @@ void sendMsg(int cdesc, char** argv) {
 	ssize_t bytesRead = read(fdesc, buffer, BUFFER_SIZE);
 	close(fdesc);
 
-	char header[HEADER_SIZE + 1];
 	parse_t items = {
 					.version = VERSION,
 					.length = bytesRead
@@ -25,10 +24,11 @@ void sendMsg(int cdesc, char** argv) {
 	strncpy(items.to, argv[2], ID_SIZE);
     items.from[ID_SIZE] = 0;
     items.to[ID_SIZE] = 0;
-	marshall(items, header);
-	send(cdesc, header, HEADER_SIZE, 0);
-	recv(cdesc, header, HEADER_SIZE, 0);
-	send(cdesc, buffer, bytesRead, 0);
+
+    //encrypt
+    byteXor(buffer, bytesRead, items.from[0]);
+
+    passMessage(cdesc, items, buffer);
 
 }
 

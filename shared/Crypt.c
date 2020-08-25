@@ -17,10 +17,10 @@ uint32_t xorShift(uint32_t seed) {
  * message.
  */
 
-void byteXor(char* bytes, size_t numBytes, char key, uint32_t seed) {
+void seedByteXor(char* bytes, size_t numBytes, char key, uint32_t seed) {
 	for (size_t i = 0; i < numBytes; i++) {
 		uint8_t iv = 0;
-		switch((i % 4) == 0) {
+		switch(i % 4) {
 			case 0:
 				seed = xorShift(seed);
 				iv = seed & (0xFF000000) >> 24;
@@ -37,4 +37,9 @@ void byteXor(char* bytes, size_t numBytes, char key, uint32_t seed) {
 		bytes[i] ^= (key ^ iv);
 	}
 
+}
+
+void byteXor(char* bytes, size_t numBytes, char key) {
+    for (size_t i = 0; i < numBytes; i++)
+        bytes[i] ^= key;
 }

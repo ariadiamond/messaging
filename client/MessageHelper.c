@@ -7,6 +7,10 @@
 
 #include"Util.h"
 
+/*
+ * For sending messages
+ */
+
 bool validName(char* name) {
 	if (strncmp(name, "NULL", ID_SIZE) == 0) //Protects getting messages
 		return false;
@@ -38,10 +42,18 @@ parse_t createMessage(char* buffer, char* from) {
 
 	//actual message input
 	printf("What would you like to send to \x1b[35m%s\x1b[0m?\n", info.to);
-	ssize_t bytesRead = read(STDIN_FILENO, buffer, BUFFER_SIZE);
-	info.length = bytesRead;
+	ssize_t bytesRead = read(STDIN_FILENO, buffer, BUFFER_SIZE / 2);
+    buffer[bytesRead] = 0; //null terminate to replace \n
+    info.length = bytesRead;
+
+    byteXor(buffer, bytesRead, from[0]); //just byteXor for now
+
 	return info;
 }
+
+/*
+ * For getting your messages from the server
+ */
 
 size_t prettyPrint(int clientDesc, char* buffer) {
     //getting header
@@ -52,6 +64,7 @@ size_t prettyPrint(int clientDesc, char* buffer) {
     }
     parse_t info;
     if (!demarshall(buffer, &info)) {
+        printf("%s\n", buffer);
         printf("Someone doesn't know how to format :O\n");
         return 0;
     }
@@ -64,7 +77,12 @@ size_t prettyPrint(int clientDesc, char* buffer) {
 
     //print the messages
     printf("From: \x1b[35m%s\x1b[0m\n", info.from);
-    write(STDOUT_FILENO, buffer, info.length);
+    if (info.version == 2) {
+        byteXor(buffer, info.length, info.from[0]);
+        write(STDOUT_FILENO, buffer, info.length);
+    } else if (info.version == 1) {
+        write(STDOUT_FILENO, buffer, info.length);
+    }
 
     //return bytes received so we don't wait for something that will never come
     return HEADER_SIZE + info.length;
