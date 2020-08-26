@@ -33,7 +33,7 @@ void sendMsg(int cdesc, char** argv) {
 }
 
 int main(int argc, char** argv) {
-	int cdesc = createClientSock(8080);
+	int cdesc = createClientSock("127.0.0.1", 8080);
 	if (argc == 2)
 		getMessages(cdesc, argv[1]);
 	else if (argc == 4)
