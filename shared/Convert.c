@@ -3,6 +3,30 @@
 
 #include"Convert.h"
 
+
+/*
+ * Length of Conversions
+ * TODO! are these correct?
+ */
+
+ size_t SFToByteLen(size_t numChars) {
+	 if ((numChars % 4) != 0) {
+		 printf("this is not a valid length %lu\n", numChars);
+		 exit(1);
+	 }
+	 return (numChars / 4) * 3;
+ }
+
+
+
+ size_t byteToSFLen(size_t numChars) {
+	size_t ret = (numChars / 3) * 4;
+	if (numChars % 3 != 0) //padding
+		ret += 4;
+	return ret;
+ }
+
+
 /*
  * Character conversions
  */
@@ -11,7 +35,7 @@ uint8_t SFtoInt(char sxFr) {
 	if (sxFr > 64 && sxFr < 91) //A-Z
 		return (sxFr - 65);
 	if (sxFr > 96 && sxFr < 123) //a-z
-	 	return (sxFr - 71);
+		return (sxFr - 71);
 	if (sxFr > 47 && sxFr < 58) //0-9
 		return (sxFr + 4);
 	if (sxFr == 43) //+
@@ -22,7 +46,7 @@ uint8_t SFtoInt(char sxFr) {
 		return 0;
 
 	//not valid
-	printf("This is not a valid base64 character %c\n", sxFr);
+	printf("This: %c, is not a valid base64 character\n", sxFr);
 	exit(1);
 }
 
@@ -47,7 +71,7 @@ char inttoSF(uint8_t val) {
  */
 
 char* SFToByte(char* SxFr, size_t numChars) {
-	char* byte = malloc(sizeof(char) * numChars); //over estimates
+	char* byte = malloc(sizeof(char) * (SFToByteLen(numChars) + 1));
 	size_t i = 0, j = 0;
 	for (; i < numChars; i += 4, j += 3) {
 		uint32_t val = (SFtoInt(SxFr[i]) & 0x3F) << 18;
@@ -66,7 +90,8 @@ char* SFToByte(char* SxFr, size_t numChars) {
 
 
 char* byteToSF(char* byte, size_t numChars) {
-	char* sxFr = malloc(sizeof(char) * (numChars * 2)); //over estimate
+	char* sxFr = malloc(sizeof(char) * (byteToSFLen(numChars) + 1));
+
 	size_t i = 0, j = 0;
 	for (; i < numChars - 2; i += 3, j +=4) {
 		uint32_t val = byte[i] << 16;
@@ -94,3 +119,59 @@ char* byteToSF(char* byte, size_t numChars) {
 	sxFr[j + 4] = 0; //null terminate
 	return sxFr;
 }
+
+/******************
+ * Hex Conversion *
+ ******************/
+
+/*
+ * Character Conversions
+ */
+
+uint8_t hexToInt(char hex) {
+	if (hex >= '0' && hex <= '9')
+		return (hex - '0');
+	if (hex >= 'A' && hex <= 'F' )
+		return (10 + (hex - 'A'));
+	if (hex >= 'a' && hex <= 'f')
+		return (10 + (hex - 'a'));
+	printf("This: %c (%d) is not a valid hex character.\n", hex, hex);
+	exit(1);
+}
+
+char intToHex(uint8_t val) {
+	if (val > 15) {
+		printf("This: %d is not a valid value.\n", val);
+		exit(1);
+	}
+	if (val < 10)
+		return val + '0';
+	return (val - 10) + 'A';
+}
+
+/*
+ * String Conversion
+ */
+
+char* hexToByte(char* hex, size_t numChars) {
+	if (numChars % 2 != 0) {
+		printf("That's not a valid length!\n");
+		exit(1);
+	}
+
+	char* ret = malloc(sizeof(char) * (numChars / 2));
+	for (size_t i = 0, j = 0; j < numChars; i++, j += 2) {
+		ret[i] = (hexToInt(hex[j]) << 4) | hexToInt(hex[j + 1]);
+	}
+	return ret;
+}
+
+
+ char* byteToHex(char* bytes, size_t numChars) {
+	 char* ret = malloc(sizeof(char) * (numChars * 2));
+	 for (size_t i = 0, j = 0; i < numChars; i++, j += 2) {
+		 ret[j] = intToHex(bytes[i] >> 4); //I don't need mask do I?
+		 ret[j + 1] = intToHex((bytes[i] & 0x0F));
+	 }
+	 return ret;
+ }

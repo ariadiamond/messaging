@@ -13,31 +13,37 @@ void runner(int sockDesc) {
 
 	//forever loop
 	while (true) {
-        //get a client
-		//I'm a little worried about having cdesc be a stack space. TODO?
-		int cdesc = accept(sockDesc, &clientAddr, &addrLen);
+		//get a client
+		int* cdesc = malloc(sizeof(int));
+		*cdesc = accept(sockDesc, &clientAddr, &addrLen);
 
 		//is it a valid request?
-		if (cdesc < 0) {
+		if (*cdesc < 0) {
+			free(cdesc);
 			continue;
 		}
 
 		//start thread to handle request
 		pthread_t thread;
-		pthread_create(&thread, NULL, threadRunner, (void*) &cdesc);
+		pthread_create(&thread, NULL, threadRunner, (void*) cdesc);
 	}
 }
 
 void* threadRunner(void* parg) {
-    //get client descriptor
+	//get client descriptor
 	int cdesc = *((int*) parg);
+	free(parg);
 
-    //do the things
-	recvMessage(cdesc);
 
-    //close the descriptor
+	//do the things
+	//no longer closing the connection each time
+	bool recv = true;
+	while (recv)
+		recv = recvMessage(cdesc);
+
+	//close the descriptor
 	close(cdesc);
 
-    //end the thread
+	//end the thread
 	return NULL;
 }

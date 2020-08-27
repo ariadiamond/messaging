@@ -13,7 +13,7 @@
 void sendMsg(int cdesc, char** argv) {
 	char buffer[BUFFER_SIZE];
 	int fdesc = open(argv[3], O_RDONLY);
-	ssize_t bytesRead = read(fdesc, buffer, BUFFER_SIZE);
+	ssize_t bytesRead = read(fdesc, buffer, BUFFER_SIZE / 2);
 	close(fdesc);
 
 	parse_t items = {
@@ -25,8 +25,7 @@ void sendMsg(int cdesc, char** argv) {
     items.from[ID_SIZE] = 0;
     items.to[ID_SIZE] = 0;
 
-    //encrypt
-    byteXor(buffer, bytesRead, items.from[0]);
+    buffer[bytesRead] = 0;
 
     passMessage(cdesc, items, buffer);
 

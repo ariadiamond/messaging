@@ -44,6 +44,13 @@ where name is you
 --------------------------------------------------------------------------------
 ## TODO
 
+### This branch
+1. Name verification
+2. Server reencryption
+3. Seeded byte Xor 
+
+### Overall
+
 1. Client config file
 2. encryption (lol)
 3. Registering names so some message integrity

@@ -23,4 +23,3 @@ parse: $(PARSE)
 pseudo: $(SOURCE)
 	$(CC) $(FLAGS) -c $^
 	$(CC) -o $(SEXE) $(SOBJ)
-	rm $(SOBJ)

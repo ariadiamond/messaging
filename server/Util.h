@@ -5,10 +5,6 @@
  * Includes
  */
 
-// Error handling
-#include<errno.h>
-#include<stdio.h>
-
 // Standard types
 #include<stdint.h>
 #include<stdbool.h>
@@ -19,9 +15,10 @@
  * Defines
  */
 
- #define BUFFER_SIZE 4096
- #define VERSION 0x0001
- #define ERR_FILE "error.log"
+#define BUFFER_SIZE 4096
+#define VERSION 0x0001
+#define ERR_FILE "error.log"
+#define KEY_FILE ".keyfile"
 
 /*
  * Options struct
@@ -30,6 +27,7 @@
 typedef struct CLArgs_t {
 	bool logging;
 	bool remove;
+    uint32_t seed;
 } CLArgs;
 
 // Runners Functions
@@ -40,6 +38,6 @@ void* threadRunner(void* parg);
 int createServerSock(size_t port);
 
 // Messages Functions
-void recvMessage(int clientSock);
+bool recvMessage(int clientSock);
 
 #endif

@@ -18,7 +18,7 @@ make pseudo
 
 # Start server
 ${SERVERDIR}${SERVER} -l &
-sleep 2 #So the server can start before getting requests
+sleep 1 #So the server can start before getting requests
 
 
 # Clients
@@ -37,6 +37,7 @@ echo "If you are looking at a screen a lot, look at something 20 feet away for 2
 ./${CLIENT} soft &
 ./${CLIENT} rmnd
 
+echo -e "\n"
 
 # Cleanup
 pkill ${SERVER}

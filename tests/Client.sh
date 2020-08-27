@@ -13,6 +13,8 @@ make
 cd ../tests/
 make pseudo
 
+echo -e "aria: x\nhmmm: *\naxoo: \`\nsoft:  \nrmnd: 5\n" > .keyfile
+
 echo "" #newline
 
 # Start server with time to set up before accepting clients
@@ -36,7 +38,7 @@ echo -e "Stuffed animals as cuddle buddies >>>>\n(hehe)" > msgFile
 ./${CLIENT} rmnd
 ./${CLIENT} soft
 
-echo "It's okay not to be perfect, although if you don't try, you will never find out how you do." > msgFile
+echo "It's okay not to be perfect, although if you don't try, you will never be perfect." > msgFile
 ./${CLIENT} aria rmnd msgFile
 echo "You.\nAre.\nImportant.\n" > msgFile # checking if escape sequences work
 ./${CLIENT} axoo rmnd msgFile

@@ -20,9 +20,9 @@ size_t prettyPrint(int clientDesc, char* buffer);
 int createClientSock(uint16_t port);
 
 //Message.c
-void sendMessages(int clientDesc, char* from);
-void passMessage(int clientDesc, parse_t headerInfo, char* buffer);
-void getMessages(int clientDesc, char* from);
+bool sendMessages(int clientDesc, char* from);
+bool passMessage(int clientDesc, parse_t headerInfo, char* buffer);
+bool getMessages(int clientDesc, char* from);
 
 
 #endif
