@@ -9,7 +9,7 @@
 
 void runner(int sockDesc) {
 	struct sockaddr clientAddr;
-	socklen_t addrLen;
+	socklen_t addrLen = sizeof(clientAddr);
 
 	//forever loop
 	while (true) {
@@ -34,15 +34,22 @@ void* threadRunner(void* parg) {
 	int cdesc = *((int*) parg);
 	free(parg);
 
-
+	//Check key and agree on seed
+	char* name = malloc(sizeof(char) * ID_SIZE + 2);
+	uint32_t seed = verifyName(cdesc, name);
+	if (seed == 0) {
+		free(name);
+		return NULL;
+	}
 	//do the things
 	//no longer closing the connection each time
 	bool recv = true;
 	while (recv)
-		recv = recvMessage(cdesc);
+		recv = recvMessage(cdesc, name, &seed);
 
-	//close the descriptor
+	//cleanup
 	close(cdesc);
+	//free(name);
 
 	//end the thread
 	return NULL;

@@ -2,7 +2,7 @@
 
 *This project is partially a result of worrying about not being good enough for grad school applications.*
 
-This is a messaging client and server pair and (will) pass encrypted messages.
+This passes messages encrypted with a byte long key and made stream cipher compatible by using a PRNG to xor different but deterministic numbers to randomize the key. I would still recommend using something like Signal over this as there are glaring flaws (such as how the seed is passed).
 
 --------------------------------------------------------------------------------
 ## Building
@@ -27,30 +27,31 @@ make
 To start the server:
 
 ```bash
-./server/CryptMsgServer [-p port] [-l] [-r]
+./server/CryptMsgServer [-p port] [-l] [-r] [-s seed]
 ```
 |Argument|Meaning|
 |:------:|-------|
 |-p port |`port` represents what port you want to star the server on. The default is 8080|
 |-l      |enables logging in file `error.log`|
 |-r      |disables auto removing messages after they are requested. This is a debugging option and requesting messages will return messages already received|
+|-s seed |`seed` represents the seed to start at for the PRNG that is used to encrypt messages|
 
 To run the client:
 ```bash
-./client/Client name
+./client/Client name key
 ```
-where name is you
+where name is you and key is your key
 
 --------------------------------------------------------------------------------
 ## TODO
 
-### This branch
-1. Name verification
-2. Server reencryption
-3. Seeded byte Xor 
+#### Soon
 
-### Overall
+1. Cleanup!!
+2. Comments
+3. Fix PseudoClient
 
-1. Client config file
-2. encryption (lol)
-3. Registering names so some message integrity
+#### Later
+
+1. Key passing
+2. encrypting server files

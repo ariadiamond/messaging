@@ -32,3 +32,33 @@ int createClientSock(uint16_t port) {
     }
 	return clientDesc;
 }
+
+uint32_t verify(int cdesc, char key, char* from) {
+	char buffer[36];
+	recv(cdesc, buffer, 35, 0);
+	uint32_t seed = atoi(buffer);
+	if (seed <= 0) {
+		return 0;
+	}
+	seed = xorShift(seed);
+	strncpy(buffer, from, ID_SIZE);
+	strcpy((buffer + ID_SIZE), "Hello friendo!");
+	seedByteXor((buffer + ID_SIZE), 15, key, &seed);
+	char* hexed = byteToHex((buffer + ID_SIZE), 15);
+	strncpy(buffer + ID_SIZE, hexed, 30);
+	if (send(cdesc, buffer, 35, 0) <= 0) {
+		dprintf(STDERR_FILENO, "Could not send message\n");
+		return 0;
+	}
+
+
+	if (recv(cdesc, buffer, 2, 0) != 2) {
+		dprintf(STDERR_FILENO, "did not send back smiley\n");
+		return 0;
+	}
+	
+	if (strncmp(buffer, ":)", 2) != 0)
+		return 0;
+
+	return seed;
+}

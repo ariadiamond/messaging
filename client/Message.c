@@ -8,15 +8,15 @@
 #include"Util.h"
 
 //this is solely to make Pseudoclient easier
-bool sendMessages(int clientDesc, char* from) {
+bool sendMessages(int clientDesc, char* from, char key, uint32_t* seed) {
 	char buffer[BUFFER_SIZE];
 	parse_t headerInfo = createMessage(buffer, from);
-	return passMessage(clientDesc, headerInfo, buffer);
+	return passMessage(clientDesc, headerInfo, buffer, key, seed);
 }
 
-bool passMessage(int clientDesc, parse_t headerInfo, char* buffer) {
-	if (headerInfo.version == 2) {
-		byteXor(buffer, headerInfo.length, headerInfo.from[0]);
+bool passMessage(int clientDesc, parse_t headerInfo, char* buffer, char key, uint32_t* seed) {
+	if (headerInfo.version == 3) {
+		seedByteXor(buffer, headerInfo.length, key, seed);
 		char* hexed = byteToHex(buffer, headerInfo.length);
 		strncpy(buffer, hexed, headerInfo.length * 2);
 		free(hexed);
@@ -36,9 +36,10 @@ bool passMessage(int clientDesc, parse_t headerInfo, char* buffer) {
 }
 
 
-bool getMessages(int clientDesc, char* from) {
+bool getMessages(int clientDesc, char* from, char key, uint32_t* seed) {
 	//send request
 	char buffer[BUFFER_SIZE];
+	memset(buffer, 0, 20);
 	dprintf(clientDesc, "To: NULL\nFrom: %s\nVersion: %04X\nLength: 0000\n",
 		from, VERSION);
 
@@ -52,6 +53,7 @@ bool getMessages(int clientDesc, char* from) {
 	//parse response
 	size_t lengths[1];
 	sscanf(buffer, "%lu", lengths);
+	printf("bytes to recv: %lu", *lengths);
 	if (*lengths == 0) {
 		printf("You don't have any new messages\n");
 		close(clientDesc);
@@ -60,7 +62,7 @@ bool getMessages(int clientDesc, char* from) {
 
 	size_t bytesRecv = 0;
 	while(bytesRecv < *lengths) {
-		size_t bytesRead = prettyPrint(clientDesc, buffer);
+		size_t bytesRead = prettyPrint(clientDesc, buffer, key, seed);
 		if (bytesRead <= 0) //error message printed by prettyPrint()
 			return false;
 		bytesRecv += bytesRead;

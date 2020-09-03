@@ -10,13 +10,16 @@
 #include<stdbool.h>
 
 #include"../shared/Parse.h"
+#include"../shared/Crypt.h"
+#include"../shared/Convert.h"
+
 
 /*
  * Defines
  */
 
 #define BUFFER_SIZE 4096
-#define VERSION 0x0001
+#define VERSION 0x0003
 #define ERR_FILE "error.log"
 #define KEY_FILE ".keyfile"
 
@@ -38,6 +41,10 @@ void* threadRunner(void* parg);
 int createServerSock(size_t port);
 
 // Messages Functions
-bool recvMessage(int clientSock);
+bool recvMessage(int clientSock, char* name, uint32_t* seed);
+
+//Verify Fucntions
+char getKey(char* name);
+uint32_t verifyName(int cdesc, char* name);
 
 #endif

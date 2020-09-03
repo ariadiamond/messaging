@@ -16,24 +16,23 @@
 
 
 extern CLArgs args;
-extern int errno;
 
 /*
  * Function Declaraions
  */
 
 // Someone sending a message
-bool writeMessage(parse_t info, int clientDesc, char* buffer);
+bool writeMessage(parse_t info, int clientDesc, char* buffer, uint32_t* seed, char key);
 // Someone requesting their messages
-bool getMessages(int clientSock, char* from, char* buffer);
+bool getMessages(int clientSock, char* from, char* buffer, uint32_t* seed, char key);
 // Someone registering
-bool registerUser(int clientSock, char* from, char* buffer);
+//bool registerUser(int clientSock, char* from, char* buffer);
 
 /*
  * Function Definitions
  */
 
-bool recvMessage(int clientSock) {
+bool recvMessage(int clientSock, char* name, uint32_t* seed) {
 	//
 	char buffer[BUFFER_SIZE + 1];
 	ssize_t bytesRead = recv(clientSock, buffer, HEADER_SIZE, 0);
@@ -52,21 +51,24 @@ bool recvMessage(int clientSock) {
 		}
 		return false;
 	}
+	if (strncmp(name, deconstruct.from, ID_SIZE) != 0) {
+		return false; //name does not match
+	}
 
 	//do the action requested
 	if (strncmp("NULL", deconstruct.to, ID_SIZE) == 0)
-		return getMessages(clientSock, deconstruct.from, buffer);
-	else if (strncmp("CREA", deconstruct.to, ID_SIZE) == 0)
-		return registerUser(clientSock, deconstruct.from, buffer);
+		return getMessages(clientSock, deconstruct.from, buffer, seed, name[ID_SIZE]);
+//	else if (strncmp("CREA", deconstruct.to, ID_SIZE) == 0)
+//		return registerUser(clientSock, deconstruct.from, buffer);
 	else
-		return writeMessage(deconstruct, clientSock, buffer);
+		return writeMessage(deconstruct, clientSock, buffer, seed, name[ID_SIZE]);
 }
 
 /*
  * Someone sends a message
  */
 
-bool writeMessage(parse_t info, int clientDesc, char* buffer) {
+bool writeMessage(parse_t info, int clientDesc, char* buffer, uint32_t* seed, char key) {
 	int fdesc = open(info.to, O_WRONLY | O_APPEND | O_CREAT, 0644);
 	if (fdesc < 0) {
 		perror("Threads::writeMessage::openFile");
@@ -81,8 +83,8 @@ bool writeMessage(parse_t info, int clientDesc, char* buffer) {
 	}
 
 	//putting the marshalled header because it is easier after requests
-	write(fdesc, buffer, HEADER_SIZE);
 
+	write(fdesc, buffer, HEADER_SIZE);
 
 	//This ack is because it expects the header, then the message body in 2
 	//separate messages (also such that the buffer can be reused)
@@ -94,7 +96,13 @@ bool writeMessage(parse_t info, int clientDesc, char* buffer) {
 		return false;
 
 	//write response
-	write(fdesc, buffer, bytesRead);
+	if (info.version == 3) {
+		char* byte = hexToByte(buffer, info.length);
+		seedByteXor(byte, info.length / 2, key, seed);
+		write(fdesc, byte, info.length / 2);
+	} else {
+		write(fdesc, buffer, bytesRead);
+	}
 	printf("\x1b[94m[+] To: %s From: %s Length: %04X\x1b[0m\n",
 		info.to, info.from, info.length);
 
@@ -106,7 +114,7 @@ bool writeMessage(parse_t info, int clientDesc, char* buffer) {
  * Someone requested their messages
  */
 
-bool getMessages(int clientSock, char* from, char* buffer) {
+bool getMessages(int clientSock, char* from, char* buffer, uint32_t* seed, char key) {
 	printf("\x1b[32m[-] Request From: %s\x1b[0m\n", from);
 
 	// open file
@@ -138,7 +146,10 @@ bool getMessages(int clientSock, char* from, char* buffer) {
 	ssize_t bytesRead = 0;
 	do {
 		bytesRead = read(fdesc, buffer, BUFFER_SIZE);
-		send(clientSock, buffer, bytesRead, 0);
+		seedByteXor(buffer, bytesRead, key, seed);
+		char* hex = byteToHex(buffer, bytesRead);
+		send(clientSock, hex, bytesRead * 2, 0);
+		free(hex);
 	} while(bytesRead != 0);
 	close(fdesc);
 
@@ -148,6 +159,8 @@ bool getMessages(int clientSock, char* from, char* buffer) {
 	return true;
 }
 
+/* unimplemented key exchange
+//use getkey and check if it equals 0
 bool keyContains(char* from) {
 	int kdesc = open(KEY_FILE, O_RDONLY);
 	ssize_t bytesRead = 0;
@@ -197,3 +210,4 @@ bool registerUser(int clientSock, char* from, char* buffer) {
 	close(kdesc);
 	return true;
 }
+*/

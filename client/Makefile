@@ -13,5 +13,10 @@ $(EXE): $(OBJECT)
 $(OBJECT): $(SOURCE) $(SHARED)
 	$(CC) $(FLAGS) -c $^
 
+gdb: $(SOURCE) $(SHARED)
+	$(CC) $(FLAGS) -g $^
+	$@ --args $(EXE) aria x
+	rm a.out
+
 clean:
 	rm $(OBJECT) $(EXE)

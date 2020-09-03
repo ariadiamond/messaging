@@ -10,8 +10,13 @@
  * Function Definitions
  */
 
-void menu(char* from) {
+void menu(char* from, char key) {
 	int cdesc = createClientSock(8080);
+	uint32_t seed = verify(cdesc, key, from);
+	if (seed == 0) {
+		dprintf(STDERR_FILENO, "Could not validate with server, exiting now\n");
+		return;
+	}
 	bool loop = true;
 	while(loop) {
 		//Print menu
@@ -35,10 +40,10 @@ void menu(char* from) {
 		//act on the input
 		switch(option) {
 			case 1:
-				loop = sendMessages(cdesc, from);
+				loop = sendMessages(cdesc, from, key, &seed);
 				break;
 			case 2:
-				loop = getMessages(cdesc, from);
+				loop = getMessages(cdesc, from, key, &seed);
 				break;
 			default:
 				printf("This is not an option!");
@@ -53,8 +58,8 @@ void menu(char* from) {
  */
 
 int main(int argc, char** argv) {
-	if (argc != 2) {
-		printf("Usage: %s yourName\n", argv[0]); //config file?
+	if (argc != 3) {
+		printf("Usage: %s yourName key\n", argv[0]); //config file?
 		exit(1);
 	}
 
@@ -64,7 +69,7 @@ int main(int argc, char** argv) {
 	from[ID_SIZE] = 0;
 
 	//menu
-	menu(from);
+	menu(from, argv[2][0]);
 
 	return 0;
 }

@@ -56,16 +56,19 @@ parse_t createMessage(char* buffer, char* from) {
  * For getting your messages from the server
  */
 
-size_t prettyPrint(int clientDesc, char* buffer) {
+size_t prettyPrint(int clientDesc, char* buffer, char key, uint32_t* seed) {
 	//getting header
 	//this will be helpful when versions are relevant for decryption
-	if (recv(clientDesc, buffer, HEADER_SIZE, 0) != HEADER_SIZE) {
+	if (recv(clientDesc, buffer, HEADER_SIZE * 2, 0) != HEADER_SIZE * 2) {
 		perror("MessageHelper::prettyPrint::recv1");
 		return 0;
 	}
+	char* bytes = hexToByte(buffer, HEADER_SIZE * 2);
+	seedByteXor(bytes, HEADER_SIZE, key, seed);
+
 	parse_t info;
-	if (!demarshall(buffer, &info)) {
-		printf("%s\n", buffer);
+	if (!demarshall(bytes, &info)) {
+		printf("%s\n", bytes);
 		printf("Someone doesn't know how to format :O\n");
 		return 0;
 	}
@@ -78,14 +81,14 @@ size_t prettyPrint(int clientDesc, char* buffer) {
 
 	//print the messages
 	printf("From: \x1b[35m%s\x1b[0m\n", info.from);
-	if (info.version == 2) {
+	if (info.version == 3) {
 		char* unhexed = hexToByte(buffer, info.length);
-		byteXor(unhexed, info.length / 2, info.from[0]);
+		seedByteXor(unhexed, info.length / 2, key, seed);
 		write(STDOUT_FILENO, unhexed, info.length / 2);
-	} else if (info.version == 1) {
+	} else {
 		write(STDOUT_FILENO, buffer, info.length);
 	}
 
 	//return bytes received so we don't wait for something that will never come
-	return HEADER_SIZE + info.length;
+	return HEADER_SIZE + (info.length / 2);
 }

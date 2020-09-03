@@ -141,7 +141,7 @@ uint8_t hexToInt(char hex) {
 
 char intToHex(uint8_t val) {
 	if (val > 15) {
-		printf("This: %d is not a valid value.\n", val);
+		printf("This: %d is not a valid hex value.\n", val);
 		exit(1);
 	}
 	if (val < 10)
@@ -170,7 +170,7 @@ char* hexToByte(char* hex, size_t numChars) {
  char* byteToHex(char* bytes, size_t numChars) {
 	 char* ret = malloc(sizeof(char) * (numChars * 2));
 	 for (size_t i = 0, j = 0; i < numChars; i++, j += 2) {
-		 ret[j] = intToHex(bytes[i] >> 4); //I don't need mask do I?
+		 ret[j] = intToHex((bytes[i] & 0xF0) >> 4); //I don't need mask do I?
 		 ret[j + 1] = intToHex((bytes[i] & 0x0F));
 	 }
 	 return ret;
