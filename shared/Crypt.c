@@ -1,12 +1,11 @@
 #include"Crypt.h"
 
 
-uint32_t xorShift(uint32_t seed) {
-	seed ^= seed << 3;
-	seed ^= seed >> 5;
-	seed ^= seed << 8;
-	seed ^= seed >> 17;
-	return seed;
+void xorShift(uint32_t* seed) {
+	*seed ^= *seed << 3;
+	*seed ^= *seed >> 5;
+	*seed ^= *seed << 8;
+	*seed ^= *seed >> 17;
 }
 
 /*
@@ -23,7 +22,7 @@ void seedByteXor(char* bytes, size_t numBytes, char key, uint32_t *seed) {
 		uint8_t iv = 0;
 		switch(i % 4) {
 			case 0:
-				*seed = xorShift(*seed);
+				xorShift(seed);
 				iv = *seed & (0xFF000000) >> 24;
 				break;
 			case 1:
@@ -42,6 +41,6 @@ void seedByteXor(char* bytes, size_t numBytes, char key, uint32_t *seed) {
 }
 
 void byteXor(char* bytes, size_t numBytes, char key) {
-    for (size_t i = 0; i < numBytes; i++)
-        bytes[i] ^= key;
+	for (size_t i = 0; i < numBytes; i++)
+		bytes[i] ^= key;
 }

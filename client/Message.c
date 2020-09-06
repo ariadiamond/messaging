@@ -39,7 +39,7 @@ bool passMessage(int clientDesc, parse_t headerInfo, char* buffer, char key, uin
 bool getMessages(int clientDesc, char* from, char key, uint32_t* seed) {
 	//send request
 	char buffer[BUFFER_SIZE];
-	memset(buffer, 0, 20);
+	memset(buffer, 0, BUFFER_SIZE);
 	dprintf(clientDesc, "To: NULL\nFrom: %s\nVersion: %04X\nLength: 0000\n",
 		from, VERSION);
 
@@ -53,11 +53,9 @@ bool getMessages(int clientDesc, char* from, char key, uint32_t* seed) {
 	//parse response
 	size_t lengths[1];
 	sscanf(buffer, "%lu", lengths);
-	printf("bytes to recv: %lu", *lengths);
 	if (*lengths == 0) {
 		printf("You don't have any new messages\n");
-		close(clientDesc);
-		return false;
+		return true;
 	}
 
 	size_t bytesRecv = 0;

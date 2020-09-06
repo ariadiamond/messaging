@@ -24,14 +24,24 @@
 #define KEY_FILE ".keyfile"
 
 /*
- * Options struct
+ * structs
  */
 
+//global options
 typedef struct CLArgs_t {
 	bool logging;
 	bool remove;
-    uint32_t seed;
+	uint32_t seed;
 } CLArgs;
+
+//client info
+typedef struct ClientInfo_t {
+	const int cdesc;
+	char name[ID_SIZE + 1];
+	char key;
+	uint32_t seed;
+} ClientInfo;
+
 
 // Runners Functions
 void runner(int sockDesc);
@@ -41,10 +51,10 @@ void* threadRunner(void* parg);
 int createServerSock(size_t port);
 
 // Messages Functions
-bool recvMessage(int clientSock, char* name, uint32_t* seed);
+bool recvMessage(ClientInfo* client);
 
 //Verify Fucntions
 char getKey(char* name);
-uint32_t verifyName(int cdesc, char* name);
+bool verifyName(ClientInfo* client);
 
 #endif

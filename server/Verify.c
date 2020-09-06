@@ -14,7 +14,7 @@ char getKey(char* name) {
 	const int ENTRY_LEN = 8;
 	char buffer[ENTRY_LEN + 1];
 	while (true) {
-		if (read(fdesc, buffer, ENTRY_LEN) <= 0) {
+		if (read(fdesc, buffer, ENTRY_LEN) != ENTRY_LEN) {
 			close(fdesc);
 			return 0;
 		}
@@ -29,36 +29,37 @@ char getKey(char* name) {
 
 
 
-uint32_t verifyName(int cdesc, char* name) {
-	uint32_t seed = xorShift(args.seed);
-	args.seed = seed;
-	dprintf(cdesc, "%u", seed);
-	seed = xorShift(seed);
+bool verifyName(ClientInfo* client) {
+	xorShift(&args.seed);
+	client->seed = args.seed;
+	args.seed += 193;
+	dprintf(client->cdesc, "%u", client->seed);
+	xorShift(&client->seed);
 	char buffer[36]; //too long
-	if (recv(cdesc, buffer, 35, 0) <= 0)
-		return 0;
+	if (recv(client->cdesc, buffer, 35, 0) <= 0)
+		return false;
 
+	char name[37];
 	if (sscanf(buffer, "%s", name) != 1)
-		return 0;
+		return false;
 
-	name[ID_SIZE + 1] = 0;
+	strncpy(client->name, name, ID_SIZE);
+	client->name[ID_SIZE + 1] = 0;
 
-	char key = getKey(name);
-	if (key == 0)
-		return 0;
-
-	name[ID_SIZE] = key;
+	client->key = getKey(client->name);
+	if (client->key == 0)
+		return false;
 
 	char compare[32];
 	strncpy(compare, "Hello friendo!", 15);
-	seedByteXor(compare, 15, key, &seed);
+	seedByteXor(compare, 15, client->key, &client->seed);
 	char* hexed = byteToHex(compare, 15);
 	if (strncmp(hexed, (buffer + ID_SIZE), 30) != 0)
-		return 0;
+		return false;
 
 	strcpy(buffer, ":)");
-	send(cdesc, buffer, 2, 0);
+	send(client->cdesc, buffer, 2, 0);
 
 
-	return seed;
+	return true;
 }

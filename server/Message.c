@@ -22,9 +22,9 @@ extern CLArgs args;
  */
 
 // Someone sending a message
-bool writeMessage(parse_t info, int clientDesc, char* buffer, uint32_t* seed, char key);
+bool writeMessage(ClientInfo* client, parse_t info, char* buffer);
 // Someone requesting their messages
-bool getMessages(int clientSock, char* from, char* buffer, uint32_t* seed, char key);
+bool getMessages(ClientInfo* client, char* buffer);
 // Someone registering
 //bool registerUser(int clientSock, char* from, char* buffer);
 
@@ -32,10 +32,10 @@ bool getMessages(int clientSock, char* from, char* buffer, uint32_t* seed, char 
  * Function Definitions
  */
 
-bool recvMessage(int clientSock, char* name, uint32_t* seed) {
+bool recvMessage(ClientInfo* client) {
 	//
 	char buffer[BUFFER_SIZE + 1];
-	ssize_t bytesRead = recv(clientSock, buffer, HEADER_SIZE, 0);
+	ssize_t bytesRead = recv(client->cdesc, buffer, HEADER_SIZE, 0);
 	if (bytesRead <= 0)
 		return false;
 
@@ -51,24 +51,24 @@ bool recvMessage(int clientSock, char* name, uint32_t* seed) {
 		}
 		return false;
 	}
-	if (strncmp(name, deconstruct.from, ID_SIZE) != 0) {
+	if (strncmp(client->name, deconstruct.from, ID_SIZE) != 0) {
 		return false; //name does not match
 	}
 
 	//do the action requested
 	if (strncmp("NULL", deconstruct.to, ID_SIZE) == 0)
-		return getMessages(clientSock, deconstruct.from, buffer, seed, name[ID_SIZE]);
+		return getMessages(client, buffer);
 //	else if (strncmp("CREA", deconstruct.to, ID_SIZE) == 0)
 //		return registerUser(clientSock, deconstruct.from, buffer);
 	else
-		return writeMessage(deconstruct, clientSock, buffer, seed, name[ID_SIZE]);
+		return writeMessage(client, deconstruct, buffer);
 }
 
 /*
  * Someone sends a message
  */
 
-bool writeMessage(parse_t info, int clientDesc, char* buffer, uint32_t* seed, char key) {
+bool writeMessage(ClientInfo* client, parse_t info, char* buffer) {
 	int fdesc = open(info.to, O_WRONLY | O_APPEND | O_CREAT, 0644);
 	if (fdesc < 0) {
 		perror("Threads::writeMessage::openFile");
@@ -88,17 +88,17 @@ bool writeMessage(parse_t info, int clientDesc, char* buffer, uint32_t* seed, ch
 
 	//This ack is because it expects the header, then the message body in 2
 	//separate messages (also such that the buffer can be reused)
-	dprintf(clientDesc, "Recieved");
+	dprintf(client->cdesc, "Recieved");
 
 	//get full message
-	ssize_t bytesRead = recv(clientDesc, buffer, BUFFER_SIZE, 0);
+	ssize_t bytesRead = recv(client->cdesc, buffer, BUFFER_SIZE, 0);
 	if (bytesRead <= 0)
 		return false;
 
 	//write response
 	if (info.version == 3) {
 		char* byte = hexToByte(buffer, info.length);
-		seedByteXor(byte, info.length / 2, key, seed);
+		seedByteXor(byte, info.length / 2, client->key, &client->seed);
 		write(fdesc, byte, info.length / 2);
 	} else {
 		write(fdesc, buffer, bytesRead);
@@ -114,13 +114,19 @@ bool writeMessage(parse_t info, int clientDesc, char* buffer, uint32_t* seed, ch
  * Someone requested their messages
  */
 
-bool getMessages(int clientSock, char* from, char* buffer, uint32_t* seed, char key) {
-	printf("\x1b[32m[-] Request From: %s\x1b[0m\n", from);
+bool getMessages(ClientInfo* client, char* buffer) {
+	printf("\x1b[32m[-] Request From: %s\x1b[0m\n", client->name);
 
 	// open file
-	int fdesc = open(from, O_RDONLY);
+	int fdesc = open(client->name, O_RDONLY);
 	if (fdesc < 0) {
-		return false;
+		switch(errno) {
+			case ENOENT:
+				dprintf(client->cdesc, "0");
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	// Send how many bytes are going to be sent
@@ -136,26 +142,38 @@ bool getMessages(int clientSock, char* from, char* buffer, uint32_t* seed, char 
 		return false;
 	}
 
-	dprintf(clientSock, "%lu", stats.st_size);
+	dprintf(client->cdesc, "%lu", stats.st_size);
 
 	//This is necessary because otherwise the client might get size and messages
 	//in the same buffer (which is not how it's designed)
-	recv(clientSock, buffer, BUFFER_SIZE, 0);
+	recv(client->cdesc, buffer, BUFFER_SIZE, 0);
 
 	//send bytes over
-	ssize_t bytesRead = 0;
-	do {
-		bytesRead = read(fdesc, buffer, BUFFER_SIZE);
-		seedByteXor(buffer, bytesRead, key, seed);
-		char* hex = byteToHex(buffer, bytesRead);
-		send(clientSock, hex, bytesRead * 2, 0);
+	while (true) {
+		if (read(fdesc, buffer, HEADER_SIZE) != HEADER_SIZE)
+			break;
+		buffer[HEADER_SIZE] = 0;
+		parse_t info;
+		demarshall(buffer, &info);
+		seedByteXor(buffer, HEADER_SIZE, client->key, &client->seed);
+		char* hex = byteToHex(buffer, HEADER_SIZE);
+		send(client->cdesc, hex, HEADER_SIZE * 2, 0);
 		free(hex);
-	} while(bytesRead != 0);
+
+		if (read(fdesc, buffer, info.length / 2) != info.length / 2)
+			return false;
+		seedByteXor(buffer, info.length / 2, client->key, &client->seed);
+		hex = byteToHex(buffer, info.length / 2);
+		send(client->cdesc, hex, info.length, 0);
+		free(hex);
+
+	}
 	close(fdesc);
 
 	//clean up
 	if (args.remove)
-		remove(from);
+		unlink(client->name);
+
 	return true;
 }
 

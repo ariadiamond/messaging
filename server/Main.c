@@ -10,7 +10,7 @@
  */
 
 CLArgs args = {
-			.logging = false,
+			.logging = true,
 			.remove  = true,
 			.seed    = 0x719DA4E2 };
 
@@ -18,7 +18,7 @@ CLArgs args = {
 void usage(char* argv) {
 	dprintf(STDERR_FILENO, "Usage: %s [-p port] [-l] [-r] [-s seed]\n", argv);
 	dprintf(STDERR_FILENO, "\t-p port \x1b[3mto set the port (default is 8080)\x1b[0m\n");
-	dprintf(STDERR_FILENO, "\t-l \x1b[3mto enable logging\x1b[0m\n");
+	dprintf(STDERR_FILENO, "\t-l \x1b[3mto disable error logging\x1b[0m\n");
 	dprintf(STDERR_FILENO, "\t-r \x1b[3mto disable removing files after requests (helpful for debugging)\x1b[0m\n");
 	dprintf(STDERR_FILENO, "\t-s seed \x1b[3mto set the seed (default is %u)\n", args.seed);
 	exit(1);
@@ -35,8 +35,8 @@ uint16_t parseArgs(int argc, char** argv) {
 
 		switch (optChar) {
 			case 'l':
-				args.logging = true;
-				printf("\x1b[1;36mError logging is enabled\x1b[0m\n");
+				args.logging = false;
+				printf("\x1b[1;36mError logging is disabled\x1b[0m\n");
 				break;
 			case 'p':
 				port = atoi(optarg);
