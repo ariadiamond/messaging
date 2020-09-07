@@ -2,6 +2,7 @@
 #include<fcntl.h> //open
 #include<stdlib.h> //atoi exit
 #include<stdio.h>
+#include<time.h>
 
 #include"Util.h"
 
@@ -11,8 +12,7 @@
 
 CLArgs args = {
 			.logging = true,
-			.remove  = true,
-			.seed    = 0x719DA4E2 };
+			.remove  = true };
 
 
 void usage(char* argv) {
@@ -20,12 +20,13 @@ void usage(char* argv) {
 	dprintf(STDERR_FILENO, "\t-p port \x1b[3mto set the port (default is 8080)\x1b[0m\n");
 	dprintf(STDERR_FILENO, "\t-l \x1b[3mto disable error logging\x1b[0m\n");
 	dprintf(STDERR_FILENO, "\t-r \x1b[3mto disable removing files after requests (helpful for debugging)\x1b[0m\n");
-	dprintf(STDERR_FILENO, "\t-s seed \x1b[3mto set the seed (default is %u)\n", args.seed);
+	dprintf(STDERR_FILENO, "\t-s seed \x1b[3mto set the seed (default is based on time())\n");
 	exit(1);
 }
 
 uint16_t parseArgs(int argc, char** argv) {
 	uint16_t port = 8080; //default port - this is not needed in CLArgs
+	args.seed = (uint32_t) time(NULL);
 
 	//parsing args using getopt
 	for (uint8_t i = 0; i < 4; i++) {
@@ -69,8 +70,6 @@ int main(int argc, char** argv) {
 		int fdesc = open(ERR_FILE, O_WRONLY | O_CREAT | O_APPEND, 0644);
 		close(fdesc);
 	}
-	int fdesc = open(KEY_FILE, O_WRONLY | O_CREAT | O_APPEND, 0600);
-	close(fdesc);
 
 	int sockDesc = createServerSock(port);
 	printf("\x1b[1;36mStarted server on port: %hu\x1b[0m\n", port);

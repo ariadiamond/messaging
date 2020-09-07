@@ -8,17 +8,16 @@
 #include"Util.h"
 
 //this is solely to make Pseudoclient easier
-bool sendMessages(int clientDesc, char* from, char key, uint32_t* seed) {
-	char buffer[BUFFER_SIZE];
-	parse_t headerInfo = createMessage(buffer, from);
-	return passMessage(clientDesc, headerInfo, buffer, key, seed);
+bool sendMessages(Info* info) {
+	parse_t headerInfo = createMessage(info);
+	return passMessage(info, headerInfo);
 }
 
-bool passMessage(int clientDesc, parse_t headerInfo, char* buffer, char key, uint32_t* seed) {
-	if (headerInfo.version == 3) {
-		seedByteXor(buffer, headerInfo.length, key, seed);
-		char* hexed = byteToHex(buffer, headerInfo.length);
-		strncpy(buffer, hexed, headerInfo.length * 2);
+bool passMessage(Info* info, parse_t headerInfo) {
+	if (headerInfo.version == 3) { //encrypt message according to v3
+		seedByteXor(info->buffer, headerInfo.length, info->key, &info->seed);
+		char* hexed = byteToHex(info->buffer, headerInfo.length);
+		strncpy(info->buffer, hexed, headerInfo.length * 2);
 		free(hexed);
 		headerInfo.length *= 2;
 	}
@@ -28,39 +27,39 @@ bool passMessage(int clientDesc, parse_t headerInfo, char* buffer, char key, uin
 		return false;
 
 	//send message
-	send(clientDesc, header, HEADER_SIZE, 0);
-	recv(clientDesc, header, HEADER_SIZE, 0); //ack, however this gets stuck
+	send(info->cdesc, header, HEADER_SIZE, 0);
+	recv(info->cdesc, header, HEADER_SIZE, 0); //ack, however this gets stuck
 		//if it never gets a response TODO
-	send(clientDesc, buffer, headerInfo.length, 0);
+	send(info->cdesc, info->buffer, headerInfo.length, 0);
 	return true;
 }
 
 
-bool getMessages(int clientDesc, char* from, char key, uint32_t* seed) {
+bool getMessages(Info* info) {
 	//send request
-	char buffer[BUFFER_SIZE];
-	memset(buffer, 0, BUFFER_SIZE);
-	dprintf(clientDesc, "To: NULL\nFrom: %s\nVersion: %04X\nLength: 0000\n",
-		from, VERSION);
+	memset(info->buffer, 0, 20); //this is to make sure parsing the number works
+	dprintf(info->cdesc, "To: NULL\nFrom: %s\nVersion: %04X\nLength: 0000\n",
+		info->name, VERSION);
 
 
-	if (recv(clientDesc, buffer, BUFFER_SIZE, 0) < 1) {
+	if (recv(info->cdesc, info->buffer, BUFFER_SIZE, 0) < 1) {
 		perror("Message::getMessages::recv");
 		return false;
 	}
-	dprintf(clientDesc, "Recieved");
+	dprintf(info->cdesc, "Recieved");
 
 	//parse response
 	size_t lengths[1];
-	sscanf(buffer, "%lu", lengths);
+	sscanf(info->buffer, "%lu", lengths);
 	if (*lengths == 0) {
 		printf("You don't have any new messages\n");
 		return true;
 	}
 
+	//Receive all the messages
 	size_t bytesRecv = 0;
 	while(bytesRecv < *lengths) {
-		size_t bytesRead = prettyPrint(clientDesc, buffer, key, seed);
+		size_t bytesRead = prettyPrint(info);
 		if (bytesRead <= 0) //error message printed by prettyPrint()
 			return false;
 		bytesRecv += bytesRead;

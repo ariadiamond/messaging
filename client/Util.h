@@ -12,18 +12,29 @@
 #define VERSION 0x0003
 #define USER_CONFIG ".userconfig"
 
+
+typedef struct Info_t {
+	int cdesc;
+	char name[ID_SIZE + 1];
+	char key;
+	uint32_t seed;
+	char buffer[BUFFER_SIZE + 1];
+} Info;
+
+
+
 //MessageHelper.c
-parse_t createMessage(char* buffer, char* from);
-size_t prettyPrint(int clientDesc, char* buffer, char key, uint32_t* seed);
+parse_t createMessage(Info* info);
+size_t prettyPrint(Info* info);
 
 //Ports.c
 int createClientSock(uint16_t port);
-uint32_t verify(int cdesc, char key, char* from);
+bool verify(Info* info);
 
 //Message.c
-bool sendMessages(int clientDesc, char* from, char key, uint32_t* seed);
-bool passMessage(int clientDesc, parse_t headerInfo, char* buffer, char key, uint32_t* seed);
-bool getMessages(int clientDesc, char* from, char key, uint32_t* seed);
+bool sendMessages(Info* info);
+bool passMessage(Info* info, parse_t headerInfo);
+bool getMessages(Info* info);
 
 
 #endif

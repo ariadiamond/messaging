@@ -40,6 +40,7 @@ typedef struct ClientInfo_t {
 	char name[ID_SIZE + 1];
 	char key;
 	uint32_t seed;
+	char buffer[BUFFER_SIZE + 1];
 } ClientInfo;
 
 

@@ -2,7 +2,7 @@
 
 *This project is partially a result of worrying about not being good enough for grad school applications.*
 
-This passes messages encrypted with a byte long key and made stream cipher compatible by using a PRNG to xor different but deterministic numbers to randomize the key. I would still recommend using something like Signal over this as there are glaring flaws (such as how the seed is passed).
+This passes messages encrypted with a byte long key made info stream cipher by using a PRNG to randomize the key. I would still recommend using something like Signal over this as there are glaring flaws [(such as how the seed is passed)](#Vulnerabilities).
 
 --------------------------------------------------------------------------------
 ## Building
@@ -42,16 +42,14 @@ To run the client:
 ```
 where name is you and key is your key
 
+
+--------------------------------------------------------------------------------
+## Vulnerabilities
+
+* With a man in the middle attack, an attacker could find the key of a user just with name verification. Since seeds and names are passed in the clear, xoring the seed and encrypted string ("Hello friendo!") against the cipher text reveals the key
+
 --------------------------------------------------------------------------------
 ## TODO
-
-#### Soon
-
-1. Cleanup!!
-2. Comments
-3. Fix PseudoClient
-
-#### Later
 
 1. Key passing
 2. encrypting server files

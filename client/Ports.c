@@ -33,32 +33,34 @@ int createClientSock(uint16_t port) {
 	return clientDesc;
 }
 
-uint32_t verify(int cdesc, char key, char* from) {
-	char buffer[36];
-	recv(cdesc, buffer, 35, 0);
-	uint32_t seed = atoi(buffer);
-	if (seed <= 0) {
-		return 0;
-	}
-	xorShift(&seed);
-	strncpy(buffer, from, ID_SIZE);
-	strcpy((buffer + ID_SIZE), "Hello friendo!");
-	seedByteXor((buffer + ID_SIZE), 15, key, &seed);
-	char* hexed = byteToHex((buffer + ID_SIZE), 15);
-	strncpy(buffer + ID_SIZE, hexed, 30);
-	if (send(cdesc, buffer, 35, 0) <= 0) {
+bool verify(Info* info) {
+	//get the seed
+	recv(info->cdesc, info->buffer, 35, 0);
+	info->seed = atoi(info->buffer);
+	if (info->seed <= 0)
+		return false;
+
+	//encrypt with the seed and key
+	xorShift(&info->seed);
+	strncpy(info->buffer, info->name, ID_SIZE);
+	strcpy((info->buffer + ID_SIZE), "Hello friendo!");
+	seedByteXor((info->buffer + ID_SIZE), 15, info->key, &info->seed);
+	char* hexed = byteToHex((info->buffer + ID_SIZE), 15);
+	strncpy(info->buffer + ID_SIZE, hexed, 30);
+
+	//send encrypted message
+	if (send(info->cdesc, info->buffer, 35, 0) <= 0) {
 		dprintf(STDERR_FILENO, "Could not send message\n");
-		return 0;
+		return false;
 	}
 
-
-	if (recv(cdesc, buffer, 2, 0) != 2) {
+	//get a smiley to check if the server validated
+	if (recv(info->cdesc, info->buffer, 2, 0) != 2) {
 		dprintf(STDERR_FILENO, "did not send back smiley\n");
-		return 0;
+		return false;
 	}
+	if (strncmp(info->buffer, ":)", 2) != 0)
+		return false;
 
-	if (strncmp(buffer, ":)", 2) != 0)
-		return 0;
-
-	return seed;
+	return true;
 }
