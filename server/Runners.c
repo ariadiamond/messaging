@@ -13,6 +13,7 @@ void runner(int sockDesc) {
 
 	//forever loop
 	while (true) {
+
 		//get a client
 		int* cdesc = malloc(sizeof(int));
 		*cdesc = accept(sockDesc, &clientAddr, &addrLen);
@@ -20,6 +21,7 @@ void runner(int sockDesc) {
 		//is it a valid request?
 		if (*cdesc < 0) {
 			free(cdesc);
+
 			continue;
 		}
 

@@ -2,7 +2,10 @@
 #include<string.h> //strncpy
 #include<stdlib.h> //exit
 
+#include<fcntl.h> //open
 #include<unistd.h> //read
+
+#include<errno.h>
 
 #include"Util.h"
 
@@ -10,8 +13,54 @@
  * Function Definitions
  */
 
+static inline void usage() {
+    if (errno == 0)
+        errno = EINVAL;
+    perror("Please run \x1b[30;47mmake config\x1b[0m before running the client");
+    exit(1);
+}
+
+Info parseConfig(char key) {
+    Info info = { .key = key };
+
+    //read config file
+    int fdesc = open(USER_CONFIG, O_RDONLY);
+    if (fdesc < 1) {
+        usage();
+    }
+  
+    read(fdesc, info.buffer, BUFFER_SIZE);
+    close(fdesc);
+
+    //get name
+    char* line = strtok(info.buffer, "\n");
+    if (line == NULL)
+        usage();
+    if (sscanf(line, "Name: %s", info.name) != 1)
+        usage();
+    info.name[ID_SIZE] = 0;
+  
+    //get address
+    line = strtok(NULL, "\n");
+    if (line == NULL)
+        usage();
+    info.address = malloc(sizeof(char) * strlen(line));
+    if (sscanf(line, "Address: %s", info.address) != 1)
+        usage();
+
+    //get port
+    line = strtok(NULL, "\n");
+    if (line == NULL)
+        usage();
+    if (sscanf(line, "Port: %hu", &(info.port)) != 1)
+        usage();
+
+    return info;
+}
+
+
 void menu(Info info) {
-	info.cdesc = createClientSock(8080);
+	info.cdesc = createClientSock(info.address, info.port);
 	if (!verify(&info)) {
 		dprintf(STDERR_FILENO, "Could not validate with server, exiting now\n");
 		return;
@@ -56,18 +105,12 @@ void menu(Info info) {
  */
 
 int main(int argc, char** argv) {
-	if (argc != 3) {
-		printf("Usage: %s yourName key\n", argv[0]); //config file?
-		exit(1);
-	}
-	Info info = {
-		.key = argv[2][0] };
-	//parsing from
-	strncpy(info.name, argv[1], ID_SIZE);
-	info.name[ID_SIZE] = 0;
 
-	//menu
-	menu(info);
+    //config parsing
+    Info config = parseConfig(argv[1][0]);
+    printf("Hi \x1b[36m%s\x1b[0m!\n", config.name);
 
-	return 0;
+    //menu
+    menu(config);
+    return 0;
 }

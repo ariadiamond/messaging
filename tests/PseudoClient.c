@@ -36,22 +36,22 @@ int main(int argc, char** argv) {
 	info.name[ID_SIZE] = 0;
 
 	if (argc == 3) {
-		info.cdesc = createClientSock(8080);
+		info.cdesc = createClientSock("127.0.0.1", 8080);
 		if (!verify(&info))
 			exit(1);
 		getMessages(&info);
 	} else if (argc == 4) {
-		info.cdesc = createClientSock(atoi(argv[3]));
+		info.cdesc = createClientSock("127.0.0.1", atoi(argv[3]));
 		if (!verify(&info))
 			exit(1);
 		getMessages(&info);
 	} else if (argc == 5) {
-		info.cdesc = createClientSock(8080);
+		info.cdesc = createClientSock("127.0.0.1", 8080);
 		if (!verify(&info))
 			exit(1);
 		sendMsg(info, argv[3], argv[4]);
 	} else if (argc == 6) {
-		info.cdesc = createClientSock(atoi(argv[5]));
+		info.cdesc = createClientSock("127.0.0.1", atoi(argv[5]));
 		if (!verify(&info))
 			exit(1);
 		sendMsg(info, argv[3], argv[4]);

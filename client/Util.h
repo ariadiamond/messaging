@@ -15,6 +15,8 @@
 
 typedef struct Info_t {
 	int cdesc;
+  char* address;
+  uint16_t port;
 	char name[ID_SIZE + 1];
 	char key;
 	uint32_t seed;
@@ -28,7 +30,7 @@ parse_t createMessage(Info* info);
 size_t prettyPrint(Info* info);
 
 //Ports.c
-int createClientSock(uint16_t port);
+int createClientSock(char* address, uint16_t port);
 bool verify(Info* info);
 
 //Message.c

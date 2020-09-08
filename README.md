@@ -18,6 +18,7 @@ The client can be done the same way (but into the client directory)
 
 ```bash
 cd client/
+make config
 make
 ```
 
@@ -38,10 +39,8 @@ To start the server:
 
 To run the client:
 ```bash
-./client/Client name key
+./client/Client
 ```
-where name is you and key is your key
-
 
 --------------------------------------------------------------------------------
 ## Vulnerabilities

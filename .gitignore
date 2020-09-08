@@ -16,6 +16,10 @@ error.log
 # To check sizes of files
 Lengths.c
 
+# Config
+.userconfig
+
+
 # Names I use for testing
 aria
 axoo
