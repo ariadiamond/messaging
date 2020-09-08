@@ -1,5 +1,6 @@
 #include<string.h> //memset
 #include<stdlib.h> //exit
+#include<stdio.h>
 
 //Socket stuff
 #include<sys/socket.h>

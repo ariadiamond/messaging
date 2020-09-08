@@ -9,16 +9,19 @@
 
 void runner(int sockDesc) {
 	struct sockaddr clientAddr;
-	socklen_t addrLen;
+	socklen_t addrLen = sizeof(clientAddr);
 
 	//forever loop
 	while (true) {
-        //get a client
+
+		//get a client
 		int* cdesc = malloc(sizeof(int));
-        *cdesc = accept(sockDesc, &clientAddr, &addrLen);
+		*cdesc = accept(sockDesc, &clientAddr, &addrLen);
 
 		//is it a valid request?
 		if (*cdesc < 0) {
+			free(cdesc);
+
 			continue;
 		}
 
@@ -29,15 +32,25 @@ void runner(int sockDesc) {
 }
 
 void* threadRunner(void* parg) {
-    //get client descriptor
-	int cdesc = *((int*) parg);
-    free(parg);
-    //do the things
-	recvMessage(cdesc);
+	//get client descriptor
+	ClientInfo client = {
+			.cdesc = *((int*) parg)};
+	free(parg);
 
-    //close the descriptor
-	close(cdesc);
+	//Check key and agree on seed
+	if (!verifyName(&client)) {
+		close(client.cdesc);
+		return NULL;
+	}
+	//do the things
+	//no longer closing the connection each time
+	bool recv = true;
+	while (recv)
+		recv = recvMessage(&client);
 
-    //end the thread
+	//cleanup
+	close(client.cdesc);
+
+	//end the thread
 	return NULL;
 }

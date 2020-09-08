@@ -10,39 +10,53 @@
 #include"../client/Util.h"
 #include"../shared/Parse.h"
 
-void sendMsg(int cdesc, char** argv) {
-	char buffer[BUFFER_SIZE];
-	int fdesc = open(argv[3], O_RDONLY);
-	ssize_t bytesRead = read(fdesc, buffer, BUFFER_SIZE);
+void sendMsg(Info info, char* to, char* file) {
+	int fdesc = open(file, O_RDONLY);
+	ssize_t bytesRead = read(fdesc, info.buffer, BUFFER_SIZE / 2);
 	close(fdesc);
 
-	char header[HEADER_SIZE + 1];
 	parse_t items = {
 					.version = VERSION,
 					.length = bytesRead
 					};
-	strncpy(items.from, argv[1], ID_SIZE);
-	strncpy(items.to, argv[2], ID_SIZE);
-    items.from[ID_SIZE] = 0;
-    items.to[ID_SIZE] = 0;
-	marshall(items, header);
-	send(cdesc, header, HEADER_SIZE, 0);
-	recv(cdesc, header, HEADER_SIZE, 0);
-	send(cdesc, buffer, bytesRead, 0);
+	strncpy(items.from, info.name, ID_SIZE);
+	strncpy(items.to, to, ID_SIZE);
+	items.from[ID_SIZE] = 0;
+	items.to[ID_SIZE] = 0;
+
+	info.buffer[bytesRead] = 0;
+
+	passMessage(&info, items);
 
 }
 
 int main(int argc, char** argv) {
-	int cdesc = createClientSock("127.0.0.1", 8080);
-	if (argc == 2)
-		getMessages(cdesc, argv[1]);
-	else if (argc == 4)
-		sendMsg(cdesc, argv);
-	else
-		printf("Usage: %s from to messageFile", argv[0]);
+	Info info = { .key = argv[2][0] };
+	strncpy(info.name, argv[1], ID_SIZE);
+	info.name[ID_SIZE] = 0;
 
-	close(cdesc);
-	exit(1);
+	if (argc == 3) {
+		info.cdesc = createClientSock("127.0.0.1", 8080);
+		if (!verify(&info))
+			exit(1);
+		getMessages(&info);
+	} else if (argc == 4) {
+		info.cdesc = createClientSock("127.0.0.1", atoi(argv[3]));
+		if (!verify(&info))
+			exit(1);
+		getMessages(&info);
+	} else if (argc == 5) {
+		info.cdesc = createClientSock("127.0.0.1", 8080);
+		if (!verify(&info))
+			exit(1);
+		sendMsg(info, argv[3], argv[4]);
+	} else if (argc == 6) {
+		info.cdesc = createClientSock("127.0.0.1", atoi(argv[5]));
+		if (!verify(&info))
+			exit(1);
+		sendMsg(info, argv[3], argv[4]);
+	} else
+		printf("Usage: %s from key to messageFile", argv[0]);
 
-
+	return 0;
 }

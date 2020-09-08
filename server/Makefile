@@ -1,8 +1,8 @@
 CC     = gcc
 FLAGS  = -Wall -Wextra -Wpedantic -Wshadow
-SHARED = ../shared/Parse.c
-SOURCE = Main.c Ports.c Message.c Runners.c
-OBJECT = $(patsubst %.c,%.o, $(SOURCE)) Parse.o
+SHARED = $(patsubst %, ../shared/%, Parse.c Crypt.c Convert.c)
+SOURCE = Main.c Ports.c Message.c Runners.c Verify.c
+OBJECT = $(patsubst %.c,%.o, $(SOURCE)) $(patsubst ../shared/%.c, %.o, $(SHARED))
 EXE    = CryptMsgServer
 
 all: $(EXE)

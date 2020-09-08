@@ -22,11 +22,11 @@ bool testResults(bool correct, char* func, char* arg) {
 }
 
 void printResults() {
-	printf("%sYou passed", MAGENTA);
+	printf("\n%sYou passed", MAGENTA);
 	if (passed[0] == passed[1])
 		printf("%s %d %s", GREEN, passed[0], MAGENTA);
 	else
 		printf("%s %d %s", RED, passed[0], MAGENTA);
 
-	printf("out of %s%d%s Tests.%s\n", GREEN, passed[1], MAGENTA, UNSET);
+	printf("out of %s%d%s Tests.%s\n\n", GREEN, passed[1], MAGENTA, UNSET);
 }

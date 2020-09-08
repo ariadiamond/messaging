@@ -7,15 +7,18 @@ client/Client
 server/CryptMsgServer
 tests/PseudoClient
 
-# Queue - why did I make it?
-shared/Queue.?
-tests/QueueTest.c
-
 # logs
 error.log
 
+# Key File
+.keyfile
+
+# To check sizes of files
+Lengths.c
+
 # Config
 .userconfig
+
 
 # Names I use for testing
 aria
