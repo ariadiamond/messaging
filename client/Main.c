@@ -14,48 +14,55 @@
  */
 
 static inline void usage() {
-    if (errno == 0)
-        errno = EINVAL;
-    perror("Please run \x1b[30;47mmake config\x1b[0m before running the client");
-    exit(1);
+	if (errno == 0)
+		errno = EINVAL;
+	perror("Please run \x1b[30;47mmake config\x1b[0m before running the client");
+	exit(1);
 }
 
-Info parseConfig(char key) {
-    Info info = { .key = key };
+Info parseConfig() {
+	Info info;
 
-    //read config file
-    int fdesc = open(USER_CONFIG, O_RDONLY);
-    if (fdesc < 1) {
-        usage();
-    }
-  
-    read(fdesc, info.buffer, BUFFER_SIZE);
-    close(fdesc);
+	//read config file
+	int fdesc = open(USER_CONFIG, O_RDONLY);
+	if (fdesc < 1) {
+		usage();
+	}
 
-    //get name
-    char* line = strtok(info.buffer, "\n");
-    if (line == NULL)
-        usage();
-    if (sscanf(line, "Name: %s", info.name) != 1)
-        usage();
-    info.name[ID_SIZE] = 0;
-  
-    //get address
-    line = strtok(NULL, "\n");
-    if (line == NULL)
-        usage();
-    info.address = malloc(sizeof(char) * strlen(line));
-    if (sscanf(line, "Address: %s", info.address) != 1)
-        usage();
+	read(fdesc, info.buffer, BUFFER_SIZE);
+	close(fdesc);
 
-    //get port
-    line = strtok(NULL, "\n");
-    if (line == NULL)
-        usage();
-    if (sscanf(line, "Port: %hu", &(info.port)) != 1)
-        usage();
+	//get name
+	char* line = strtok(info.buffer, "\n");
+	if (line == NULL)
+		usage();
+	if (sscanf(line, "Name: %s", info.name) != 1)
+		usage();
+	info.name[ID_SIZE] = 0;
 
-    return info;
+	//get key
+	line = strtok(NULL, "\n");
+	if (line == NULL)
+		usage();
+	if (sscanf(line, "Key: %c", &(info.key)) != 1)
+		usage();
+
+	//get address
+	line = strtok(NULL, "\n");
+	if (line == NULL)
+		usage();
+	info.address = malloc(sizeof(char) * strlen(line));
+	if (sscanf(line, "Address: %s", info.address) != 1)
+		usage();
+
+	//get port
+	line = strtok(NULL, "\n");
+	if (line == NULL)
+		usage();
+	if (sscanf(line, "Port: %hu", &(info.port)) != 1)
+		usage();
+
+	return info;
 }
 
 
@@ -104,13 +111,13 @@ void menu(Info info) {
  * main
  */
 
-int main(int argc, char** argv) {
+int main(void) {
 
-    //config parsing
-    Info config = parseConfig(argv[1][0]);
-    printf("Hi \x1b[36m%s\x1b[0m!\n", config.name);
+	//config parsing
+	Info config = parseConfig();
+	printf("Hi \x1b[36m%s\x1b[0m!\n", config.name);
 
-    //menu
-    menu(config);
-    return 0;
+	//menu
+	menu(config);
+	return 0;
 }

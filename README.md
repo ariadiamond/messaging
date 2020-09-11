@@ -50,5 +50,9 @@ To run the client:
 --------------------------------------------------------------------------------
 ## TODO
 
+1. Rework verification so the client passes the seed (update RC test)
+2. create Q or LL to hold locks for files (to pass RC test)
+
+
 1. Key passing
 2. encrypting server files

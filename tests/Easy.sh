@@ -38,7 +38,7 @@ echo -e "Stuffed animals as cuddle buddies >>>>\n(hehe)" > msgFile
 
 echo "It's okay not to be perfect, although if you don't try, you will never be perfect." > msgFile
 ./${CLIENT} aria x rmnd msgFile
-echo "You.\nAre.\nImportant.\n" > msgFile # checking if escape sequences work
+echo -e "You.\nAre.\nImportant.\n" > msgFile
 ./${CLIENT} axoo a rmnd msgFile
 ./${CLIENT} rmnd Q
 
