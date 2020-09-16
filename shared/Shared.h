@@ -1,5 +1,5 @@
-#ifndef _PARSE_H_
-#define _PARSE_H_
+#ifndef _SHARED_H_
+#define _SHARED_H_
 
 /*
  * Include
@@ -7,6 +7,7 @@
 
 #include<stdint.h>
 #include<stdbool.h>
+#include<stdlib.h> //size_t
 
 /*
  * Define
@@ -31,13 +32,18 @@ typedef struct parse_t {
  * Functions
  */
 
+
+//Parse.c
 bool demarshall(char* header, parse_t* parsed);
 bool marshall(parse_t items, char* header);
 
-#endif
+//Crypt.c
+void xorShift(uint32_t* seed);
+void seedByteXor(char* bytes, size_t numBytes, char key, uint32_t* seed);
+void byteXor(char* bytes, size_t numBytes, char key);
 
-/* TODO:
- * return int and set errno
- * more tests
- * how to deal with invalid lengths
- */
+//Convert.c
+char* hexToByte(char* bytes, size_t numChars);
+char* byteToHex(char* hex, size_t numChars);
+
+#endif

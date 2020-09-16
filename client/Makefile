@@ -1,20 +1,20 @@
 CC     = gcc
 FLAGS  = -Wall -Wextra -Wpedantic -Wshadow
-SHARED = ../shared/Parse.c ../shared/Convert.c ../shared/Crypt.c
 SOURCE = Main.c Ports.c Message.c MessageHelper.c
-OBJECT = $(patsubst %.c,%.o, $(SOURCE)) $(patsubst ../shared/%.c, %.o, $(SHARED))
+OBJECT = $(patsubst %.c,%.o, $(SOURCE))
+LINKER = -L../shared/ -lshared
 EXE    = Client
 
 all: $(EXE)
 
 $(EXE): $(OBJECT)
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ $(LINKER)
 
-$(OBJECT): $(SOURCE) $(SHARED)
+$(OBJECT): $(SOURCE)
 	$(CC) $(FLAGS) -c $^
 
-gdb: $(SOURCE) $(SHARED)
-	$(CC) $(FLAGS) -g $^
+gdb: $(SOURCE)
+	$(CC) $(FLAGS) -g $^ $(LINKER)
 	$@ --args $(EXE) aria x
 	rm a.out
 

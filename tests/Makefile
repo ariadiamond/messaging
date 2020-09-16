@@ -9,11 +9,9 @@ PEXE  = ParseTest
 # Pseudo Client - designed for automation
 LOCAL  = PseudoClient.c
 CLIENT = Ports.c Message.c MessageHelper.c
-SHARED = Parse.c Crypt.c Convert.c
-SOURCE = $(LOCAL) $(patsubst %, ../client/%, $(CLIENT))\
-	$(patsubst %, ../shared/%, $(SHARED))
-SOBJ   = $(patsubst %.c, %.o, $(LOCAL)) $(patsubst %.c, %.o, $(CLIENT))\
-	$(patsubst %.c, %.o,  $(SHARED))
+SOURCE = $(LOCAL) $(patsubst %, ../client/%, $(CLIENT))
+SOBJ   = $(patsubst %.c, %.o, $(LOCAL)) $(patsubst %.c, %.o, $(CLIENT))
+LINKER = -L../shared/ -lshared
 SEXE   = PseudoClient
 
 parse: $(PARSE)
@@ -24,7 +22,7 @@ parse: $(PARSE)
 
 pseudo: $(SOURCE)
 	$(CC) $(FLAGS) -c $^
-	$(CC) -o $(SEXE) $(SOBJ)
+	$(CC) -o $(SEXE) $(SOBJ) $(LINKER)
 
 clean:
 	rm *.o

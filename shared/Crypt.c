@@ -1,4 +1,4 @@
-#include"Crypt.h"
+#include"Shared.h"
 
 
 void xorShift(uint32_t* seed) {

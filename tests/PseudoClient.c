@@ -8,7 +8,6 @@
 #include<sys/socket.h>
 
 #include"../client/Util.h"
-#include"../shared/Parse.h"
 
 void sendMsg(Info info, char* to, char* file) {
 	int fdesc = open(file, O_RDONLY);

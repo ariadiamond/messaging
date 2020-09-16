@@ -9,9 +9,7 @@
 #include<stdint.h>
 #include<stdbool.h>
 
-#include"../shared/Parse.h"
-#include"../shared/Crypt.h"
-#include"../shared/Convert.h"
+#include"../shared/Shared.h"
 
 
 /*

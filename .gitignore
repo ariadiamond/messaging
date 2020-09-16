@@ -1,6 +1,7 @@
 # C object Files
 *.o
 a.out
+lib*.a
 
 # Executables
 client/Client
