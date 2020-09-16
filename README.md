@@ -2,7 +2,7 @@
 
 *This project is partially a result of worrying about not being good enough for grad school applications.*
 
-This passes messages encrypted with a byte long key made info stream cipher by using a PRNG to randomize the key. I would still recommend using something like Signal over this as there are glaring flaws [(such as how the seed is passed)](#Vulnerabilities).
+This passes messages encrypted with a byte long key made info stream cipher by using a PRNG to randomize the key. I would still recommend using something like Signal over this.
 
 --------------------------------------------------------------------------------
 ## Building
@@ -43,15 +43,9 @@ To run the client:
 ```
 
 --------------------------------------------------------------------------------
-## Vulnerabilities
-
-* With a man in the middle attack, an attacker could find the key of a user just with name verification. Since seeds and names are passed in the clear, xoring the seed and encrypted string ("Hello friendo!") against the cipher text reveals the key
-
---------------------------------------------------------------------------------
 ## TODO
 
-1. Rework verification so the client passes the seed (update RC test)
-2. create Q or LL to hold locks for files (to pass RC test)
+1. create Q or LL to hold locks for files (to pass RC test)
 
 
 1. Key passing

@@ -1,5 +1,5 @@
-#ifndef _CRYPTO_H_
-#define _CRYPTO_H_
+#ifndef _CONVERT_H_
+#define _CONVERT_H_
 
 #include<stdint.h>
 

@@ -6,11 +6,15 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<unistd.h>
+#include<time.h>
 
 #include"Util.h"
 
+const uint8_t MSG_LEN = 20;
+const char MSG[21] = {"I just want a hug :/"};
+
 int createClientSock(char* address, uint16_t port) {
-    //TCP IPv4
+	//TCP IPv4
 	int clientDesc = socket(AF_INET, SOCK_STREAM, 0);
 
 	//configure socket options
@@ -19,11 +23,11 @@ int createClientSock(char* address, uint16_t port) {
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(port);
 
-    //converts human readable addresses to machine readable addresses
+	//converts human readable addresses to machine readable addresses
 	if (inet_pton(AF_INET, address, &(serverAddr.sin_addr)) != 1) {
-        perror("Ports::createClientSock::inet_pton");
-        exit(1);
-    }
+		perror("Ports::createClientSock::inet_pton");
+		exit(1);
+	}
 
 	//creates connection
 	if (connect(clientDesc, (struct sockaddr*) &serverAddr, sizeof(serverAddr)) != 0) {
@@ -34,33 +38,31 @@ int createClientSock(char* address, uint16_t port) {
 }
 
 bool verify(Info* info) {
-	//get the seed
-	recv(info->cdesc, info->buffer, 35, 0);
-	info->seed = atoi(info->buffer);
-	if (info->seed <= 0)
-		return false;
+	//get the seed and put it in the buffer
+	info->seed = (uint32_t) time(NULL);
+	uint32_t seed = info->seed ^ ((info->key << 24)
+		| (info->key << 16) | (info->key << 8) | (info->key));
+		//to not send the seed in the clear, it is xored with the key
+	ssize_t bytesRead = sprintf(info->buffer + (2 * MSG_LEN), "%u", seed);
 
-	//encrypt with the seed and key
-	xorShift(&info->seed);
-	strncpy(info->buffer, info->name, ID_SIZE);
-	strcpy((info->buffer + ID_SIZE), "Hello friendo!");
-	seedByteXor((info->buffer + ID_SIZE), 15, info->key, &info->seed);
-	char* hexed = byteToHex((info->buffer + ID_SIZE), 15);
-	strncpy(info->buffer + ID_SIZE, hexed, 30);
+	//encrypt the message
+	strncpy(info->buffer, MSG, MSG_LEN + 1);
+	seedByteXor(info->buffer, MSG_LEN, info->key, &info->seed);
+	char* hex = byteToHex(info->buffer, MSG_LEN);
+	strncpy(info->buffer, hex, (2 * MSG_LEN));
+	free(hex);
 
-	//send encrypted message
-	if (send(info->cdesc, info->buffer, 35, 0) <= 0) {
-		dprintf(STDERR_FILENO, "Could not send message\n");
-		return false;
-	}
 
-	//get a smiley to check if the server validated
-	if (recv(info->cdesc, info->buffer, 2, 0) != 2) {
-		dprintf(STDERR_FILENO, "did not send back smiley\n");
-		return false;
-	}
-	if (strncmp(info->buffer, ":)", 2) != 0)
-		return false;
+	bytesRead += (2 * MSG_LEN); //we need bytesRead because the seed is not
+								//constant length
+	send(info->cdesc, info->buffer, bytesRead, 0);
 
-	return true;
+	//check if we got a smiley face (aka the server found the key)
+	recv(info->cdesc, info->buffer, 2, 0);
+	if (strncmp(info->buffer, ":)", 2) == 0)
+		return true;
+
+	//things did not work
+	dprintf(STDERR_FILENO, "Cannot verify\n");
+	return false;
 }

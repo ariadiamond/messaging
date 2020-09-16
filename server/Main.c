@@ -20,13 +20,11 @@ void usage(char* argv) {
 	dprintf(STDERR_FILENO, "\t-p port \x1b[3mto set the port (default is 8080)\x1b[0m\n");
 	dprintf(STDERR_FILENO, "\t-l \x1b[3mto disable error logging\x1b[0m\n");
 	dprintf(STDERR_FILENO, "\t-r \x1b[3mto disable removing files after requests (helpful for debugging)\x1b[0m\n");
-	dprintf(STDERR_FILENO, "\t-s seed \x1b[3mto set the seed (default is based on time())\n");
 	exit(1);
 }
 
 uint16_t parseArgs(int argc, char** argv) {
 	uint16_t port = 8080; //default port - this is not needed in CLArgs
-	args.seed = (uint32_t) time(NULL);
 
 	//parsing args using getopt
 	for (uint8_t i = 0; i < 4; i++) {
@@ -47,12 +45,6 @@ uint16_t parseArgs(int argc, char** argv) {
 			case 'r':
 				args.remove = false;
 				printf("\x1b[1;36mMessages are not automatically deleted\x1b[0m\n");
-				break;
-			case 's':
-				args.seed = atoi(optarg);
-				if (args.seed == 0)
-					usage(argv[0]);
-				printf("\x1b[1;36mSeed is: %u\x1b[0m\n", args.seed);
 				break;
 			default:
 				usage(argv[0]);

@@ -9,10 +9,8 @@
 #include<sys/stat.h>
 
 #include<sys/socket.h> //recv
-//#include<pthread.h>
 
 #include"Util.h"
-#include"../shared/Crypt.h"
 
 
 extern CLArgs args;
@@ -90,7 +88,7 @@ bool writeMessage(ClientInfo* client, parse_t info) {
 		return false;
 
 	//write response
-	if (info.version == 3) {
+	if (info.version == 3 || info.version == 4) {
 		char* byte = hexToByte(client->buffer, info.length);
 		seedByteXor(byte, info.length / 2, client->key, &client->seed);
 		write(fdesc, byte, info.length / 2);

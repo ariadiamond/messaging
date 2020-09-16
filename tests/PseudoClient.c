@@ -35,28 +35,33 @@ int main(int argc, char** argv) {
 	strncpy(info.name, argv[1], ID_SIZE);
 	info.name[ID_SIZE] = 0;
 
-	if (argc == 3) {
-		info.cdesc = createClientSock("127.0.0.1", 8080);
-		if (!verify(&info))
-			exit(1);
-		getMessages(&info);
-	} else if (argc == 4) {
-		info.cdesc = createClientSock("127.0.0.1", atoi(argv[3]));
-		if (!verify(&info))
-			exit(1);
-		getMessages(&info);
-	} else if (argc == 5) {
-		info.cdesc = createClientSock("127.0.0.1", 8080);
-		if (!verify(&info))
-			exit(1);
-		sendMsg(info, argv[3], argv[4]);
-	} else if (argc == 6) {
-		info.cdesc = createClientSock("127.0.0.1", atoi(argv[5]));
-		if (!verify(&info))
-			exit(1);
-		sendMsg(info, argv[3], argv[4]);
-	} else
-		printf("Usage: %s from key to messageFile", argv[0]);
-
+	switch (argc) {
+		case 3:
+			info.cdesc = createClientSock("127.0.0.1", 8080);
+			if (!verify(&info))
+				exit(1);
+			getMessages(&info);
+			break;
+		case 4:
+			info.cdesc = createClientSock("127.0.0.1", atoi(argv[3]));
+			if (!verify(&info))
+				exit(1);
+			getMessages(&info);
+			break;
+		case 5:
+			info.cdesc = createClientSock("127.0.0.1", 8080);
+			if (!verify(&info))
+				exit(1);
+			sendMsg(info, argv[3], argv[4]);
+			break;
+		case 6:
+			info.cdesc = createClientSock("127.0.0.1", atoi(argv[5]));
+			if (!verify(&info))
+				exit(1);
+			sendMsg(info, argv[3], argv[4]);
+			break;
+		default:
+			printf("Usage: %s from key [to messageFile] [port]", argv[0]);
+	}
 	return 0;
 }

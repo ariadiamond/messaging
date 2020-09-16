@@ -39,7 +39,7 @@ char* hexToByte(char* hex, size_t numChars) {
 		exit(1);
 	}
 
-	char* ret = malloc(sizeof(char) * (numChars / 2));
+	char* ret = malloc(sizeof(char) * ((numChars / 2) + 1));
 	for (size_t i = 0, j = 0; j < numChars; i++, j += 2) {
 		ret[i] = (hexToInt(hex[j]) << 4) | hexToInt(hex[j + 1]);
 	}
@@ -48,7 +48,7 @@ char* hexToByte(char* hex, size_t numChars) {
 
 
  char* byteToHex(char* bytes, size_t numChars) {
-	 char* ret = malloc(sizeof(char) * (numChars * 2));
+	 char* ret = malloc(sizeof(char) * ((numChars * 2) + 1));
 	 for (size_t i = 0, j = 0; i < numChars; i++, j += 2) {
 		 ret[j] = intToHex((bytes[i] & 0xF0) >> 4); //I don't need mask do I?
 		 ret[j + 1] = intToHex((bytes[i] & 0x0F));

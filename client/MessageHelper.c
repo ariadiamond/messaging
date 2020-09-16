@@ -81,7 +81,7 @@ size_t prettyPrint(Info* info) {
 
 	//print the messages
 	printf("From: \x1b[35m%s\x1b[0m\n", header.from);
-	if (header.version == 3) { //decrypt according to v3
+	if (header.version == 3 || header.version == 4) { //decrypt according to v3
 		char* unhexed = hexToByte(info->buffer, header.length);
 		seedByteXor(unhexed, header.length / 2, info->key, &info->seed);
 		write(STDOUT_FILENO, unhexed, header.length / 2);

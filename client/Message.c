@@ -14,7 +14,7 @@ bool sendMessages(Info* info) {
 }
 
 bool passMessage(Info* info, parse_t headerInfo) {
-	if (headerInfo.version == 3) { //encrypt message according to v3
+	if (headerInfo.version == 3 || headerInfo.version == 4) { //encrypt message according to v3
 		seedByteXor(info->buffer, headerInfo.length, info->key, &info->seed);
 		char* hexed = byteToHex(info->buffer, headerInfo.length);
 		strncpy(info->buffer, hexed, headerInfo.length * 2);

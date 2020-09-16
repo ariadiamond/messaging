@@ -9,7 +9,7 @@
 #include"../shared/Crypt.h"
 
 #define BUFFER_SIZE 4096
-#define VERSION 0x0003
+#define VERSION 0x0004
 #define USER_CONFIG ".userconfig"
 
 

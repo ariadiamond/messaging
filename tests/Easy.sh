@@ -5,15 +5,24 @@ SERVERDIR=../server/
 SERVER=CryptMsgServer
 
 
+#############
+# Prep work #
+#############
+
 # Build server
 cd ${SERVERDIR}
-make
+make > /dev/null
 
 # Build Client
 cd ../tests/
-make pseudo
+make pseudo > /dev/null
 
-echo "" #newline
+echo ""
+
+
+#################
+# Do the things #
+#################
 
 # Start server with time to set up before accepting clients
 ${SERVERDIR}${SERVER} -p 8080 &
@@ -42,9 +51,13 @@ echo -e "You.\nAre.\nImportant.\n" > msgFile
 ./${CLIENT} axoo a rmnd msgFile
 ./${CLIENT} rmnd Q
 
-echo "" #newline
+echo ""
 
-# Cleanup
+
+###########
+# Cleanup #
+###########
+
 pkill ${SERVER}
 rm msgFile
 #rm soft rmnd # easy to comment out (Don't forget -r!)

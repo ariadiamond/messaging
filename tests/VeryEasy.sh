@@ -9,7 +9,6 @@ CLIENT=./PseudoClient
 SERVERDIR=../server/
 SERVER=CryptMsgServer
 
-
 # Build server
 cd ${SERVERDIR}
 make > /dev/null
@@ -19,22 +18,24 @@ cd ../tests/
 make pseudo > /dev/null
 
 # Start the server
-echo -e "\n\x1b[100;1mServer Output:\x1b[0m"
-${SERVERDIR}${SERVER} -r &
+valgrind ${SERVERDIR}${SERVER} -r > out 2>&1 &
 sleep 1
 
 echo -e "The idea that climate change is going to eventually eradicate humanity and yet people are more inclined to try to continue to exploit the earth because it improves their lives materialistically is kind of sadening.\nI know it\'s amazing that people have better lives, but also their lives are simultaneously being destroyed by the rich." > MsgFile
 
 
 # Do the things
+#echo -e "\x1b[33mSend Message\x1b[0m"
 ${CLIENT} aria x axoo MsgFile
+#echo -e "\x1b[33mCheck for message\x1b[0m"
 ${CLIENT} axoo a > clientFile1
+#echo -e "\x1b[33mCheck again for message\x1b[0m"
 ${CLIENT} axoo a > clientFile2
+#echo -e "\x1b[33mAria checks for message\x1b[0m"
 ${CLIENT} aria x > clientFile3
 
 # Did the things
-pkill ${SERVER}
-
+kill "$(lsof -i :8080 | grep "[0-9]" | awk '{ print $2}')"
 
 ##########
 # Tests! #
@@ -82,8 +83,12 @@ else
 	cat clientFile3
 fi
 
+###############################
+# Server Output with valgrind #
+###############################
 echo ""
-
+echo -e "\n\x1b[100;1mServer Output:\x1b[0m"
+cat out
 
 # Cleanup
-rm axoo clientFile? MsgFile
+rm axoo clientFile? MsgFile out
