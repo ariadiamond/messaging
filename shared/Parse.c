@@ -1,8 +1,7 @@
 #include<stdio.h>  //sscanf
-#include<stdlib.h> //malloc
 #include<string.h> //strcpy strtok
 
-#include"Parse.h"
+#include"Shared.h"
 
 
 bool demarshall(char* header, parse_t* parsed) {

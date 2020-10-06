@@ -7,6 +7,7 @@
 
 #include<stdint.h>
 #include<stdbool.h>
+#include<stdlib.h> //is size_t in here?
 
 /*
  * Define
@@ -34,10 +35,12 @@ typedef struct parse_t {
 bool demarshall(char* header, parse_t* parsed);
 bool marshall(parse_t items, char* header);
 
-#endif
+//Convert.c
+char* hexToByte(char* bytes, size_t numChars);
+char* byteToHex(char* nex, size_t numChars);
 
-/* TODO:
- * return int and set errno
- * more tests
- * how to deal with invalid lengths
- */
+
+//Encrypt.c
+void ceaser(char* bytes, size_t numChars, int spin);
+
+#endif

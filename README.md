@@ -2,7 +2,7 @@
 
 *This project is partially a result of worrying about not being good enough for grad school applications.*
 
-This is a messaging client and server pair and (will) pass encrypted messages. Please don't actually use this for sensitive things (use something like Signal).
+Did somone say Ceaser cypher?!?! Let's get this old but ~~gold~~ security mechanism implemented! 
 
 --------------------------------------------------------------------------------
 ## Building
@@ -42,7 +42,8 @@ To run the client:
 ```
 
 --------------------------------------------------------------------------------
-## TODO
+## Vulnerabilities
 
-1. encryption (lol)
-2. Registering names so some message integrity
+This uses a Ceaser cypher to encrypt messages, which is bad. If you want to brute force it, the algorithm is fast to run, and there's a very small amount of inputs to try (128 for ASCII, however many options are unavailable). This is because adding or subtracting characters with too big numbers would put the character out of ASCII range (ie. if you have an 'a' (97), you know that it cannot spin more than positive 20 or negative 97 (but less because special characters).
+
+There's also frequency analysis, which is a little less certain with shorter messages, but since the spin amount is consistent, passing a few messages will get a large enough reportiore quickly.

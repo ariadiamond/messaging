@@ -8,7 +8,6 @@
 #include<sys/socket.h>
 
 #include"../client/Util.h"
-#include"../shared/Parse.h"
 
 void sendMsg(int cdesc, char** argv) {
 	char buffer[BUFFER_SIZE];
